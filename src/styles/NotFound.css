@@ -1,0 +1,34 @@
+.not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+}
+.buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.leading {
+    margin-bottom: 32px;
+    color: #667085;
+    width: 360px;
+    text-align: center;
+    font-size: 16px;
+}
+.heading {
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+.loginLink {
+    text-decoration: none;
+    color: #667085;
+    margin-right: 20px;
+    transition: all .2s;
+}
+.loginLink:hover {
+    color: #303742;
+}
