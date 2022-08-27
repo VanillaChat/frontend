@@ -9,7 +9,7 @@ type Props = {
 };
 export const Navbar = (props: Props) => {
   return (
-    <div className="navbar">
+    <header className="navbar">
       <Link to="/">
         <div className="logo">
           <img
@@ -22,14 +22,14 @@ export const Navbar = (props: Props) => {
           <p className="wordmark">Vanilla</p>
         </div>
       </Link>
-      <div className="links">
+      <nav className="links">
         <Link to="/login" className="loginLink">
           Log in
         </Link>
         <Button filled to="/register">
           Sign up
         </Button>
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 };

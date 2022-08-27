@@ -10,31 +10,31 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+const root = ReactDOM.createRoot(document.body);
 
 root.render(
   <React.StrictMode>
     <BrowserRouter>
       <Navbar />
-      <Routes>
-        <Route path="/">
-          <Route path="" element={<Index />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-        </Route>
-        <Route
-          path="*"
-          element={
-            <>
-              {/*<Navbar />*/}
-              <NotFound />
-            </>
-          }
-        />
-      </Routes>
+      <main>
+        <Routes>
+          <Route path="/">
+            <Route path="" element={<Index />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+          </Route>
+          <Route
+            path="*"
+            element={
+              <>
+                {/*<Navbar />*/}
+                <NotFound />
+              </>
+            }
+          />
+        </Routes>
+      </main>
     </BrowserRouter>
   </React.StrictMode>
 );
