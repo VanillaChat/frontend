@@ -10,7 +10,14 @@ const NotFound: React.FC = () => {
   return (
     <div className="not-found">
       <img src={XIcon} alt="x-icon" />
-      <h3 className="heading">404 - Not Found</h3>
+      <h3
+        className="heading"
+        onClick={(event) =>
+          window.open("https://www.youtube.com/watch?v=eyX0xjB0LjY", "_blank")
+        }
+      >
+        404 - Lost Not Found
+      </h3>
       <p className="leading">
         We really don’t know, why you’re here... It’s a weird place, perhaps
         you’re lost?

@@ -22,6 +22,7 @@
     font-size: 30px;
     font-weight: 600;
     margin-bottom: 0;
+    cursor: pointer;
 }
 .loginLink {
     text-decoration: none;
