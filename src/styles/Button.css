@@ -11,6 +11,7 @@
     padding: 10px 25px;
     color: #344054;
     transition: all .2s;
+    -webkit-user-drag: none;
 }
 .button > img {
     width: 20px;

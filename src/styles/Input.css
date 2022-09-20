@@ -5,6 +5,13 @@
     font-size: 16px;
     outline: none;
     transition: all .2s;
+    font-family: Inter, sans-serif;
+    resize: none;
+}
+.input.search {
+    padding-left: 38px;
+    font-size: 15px;
+    background: #fff url(../icons/search-sm.svg) no-repeat 13px center;
 }
 .placeholder {
     color: #344054;

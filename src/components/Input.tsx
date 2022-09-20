@@ -13,6 +13,10 @@ type Props = {
   label?: string;
   labelStyle?: React.CSSProperties;
   style?: React.CSSProperties;
+  containerClass?: string;
+  icon?: string;
+  className?: string;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 };
 
 const Input: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
@@ -22,25 +26,30 @@ const Input: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
     );
   if (props.textarea) {
     return (
-      <div className="input-flex">
+      <div className={`input-flex ${props.containerClass}`}>
         {props.label && (
           <label htmlFor={props.id} style={props.labelStyle}>
             {props.label}
           </label>
         )}
         <textarea
-          className="input"
+          className={`input${props.className ? ` ${props.className}` : ""}`}
           value={props.value}
           onChange={props.onChange}
           placeholder={props.placeholder}
           style={props.style}
           id={props.id}
+          onKeyDown={props.onKeyDown}
         />
       </div>
     );
   }
   return (
-    <div className="input-flex">
+    <div
+      className={`input-flex${
+        props.containerClass ? ` ${props.containerClass}` : ""
+      }`}
+    >
       {props.label && (
         <label
           htmlFor={props.id}
@@ -51,13 +60,14 @@ const Input: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
         </label>
       )}
       <input
-        className="input"
+        className={`input${props.className ? ` ${props.className}` : ""}`}
         type={props.type}
         value={props.value}
         onChange={props.onChange}
         placeholder={props.placeholder}
         style={props.style}
         id={props.id}
+        onKeyDown={props.onKeyDown}
       />
     </div>
   );

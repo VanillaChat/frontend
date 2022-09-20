@@ -17,52 +17,55 @@ export default class Register extends React.PureComponent {
   }
 
   render() {
+    document.title = "Sign up | Vanilla";
     return (
-      <div className="login-form">
-        <img src={logo} alt="logo" className="form-logo" />
-        <h1 className="form-heading">Create an account</h1>
-        <p>Welcome to Vanilla!</p>
-        <div className="form">
-          <form style={{ marginTop: "10px" }}>
-            <Input
-              type="text"
-              placeholder="Enter your email"
-              label="Email"
-              id="email"
-            />
-            <Input
-              type="password"
-              placeholder="•••••••••••"
-              label="Password"
-              labelStyle={{ marginTop: "15px" }}
-              id="password"
-            />
-            <Input
-              type="password"
-              placeholder="•••••••••••"
-              label="Confirm password"
-              labelStyle={{ marginTop: "15px" }}
-              id="confirmPassword"
-            />
-          </form>
-          <Button
-            filled
-            style={{ width: "100%", marginTop: "20px", marginBottom: "20px" }}
-          >
-            Get started
-          </Button>
-          <p className="line">OR</p>
-          <Button
-            style={{ width: "385px", marginTop: "20px" }}
-            icon={DiscordIcon}
-          >
-            Use Discord to create my account
-          </Button>
-          <p className="sign-up-text">
-            Already have an account? <Link to="/login">Log in</Link>
-          </p>
+      <main id="register">
+        <div className="login-form">
+          <img src={logo} alt="logo" className="form-logo" />
+          <h1 className="form-heading">Create an account</h1>
+          <p>Welcome to Vanilla!</p>
+          <div className="form">
+            <form style={{ marginTop: "10px" }}>
+              <Input
+                type="text"
+                placeholder="Enter your email"
+                label="Email"
+                id="email"
+              />
+              <Input
+                type="password"
+                placeholder="•••••••••••"
+                label="Password"
+                labelStyle={{ marginTop: "15px" }}
+                id="password"
+              />
+              <Input
+                type="password"
+                placeholder="•••••••••••"
+                label="Confirm password"
+                labelStyle={{ marginTop: "15px" }}
+                id="confirmPassword"
+              />
+            </form>
+            <Button
+              filled
+              style={{ width: "100%", marginTop: "20px", marginBottom: "20px" }}
+            >
+              Get started
+            </Button>
+            <p className="line">OR</p>
+            <Button
+              style={{ width: "385px", marginTop: "20px" }}
+              icon={DiscordIcon}
+            >
+              Use Discord to create my account
+            </Button>
+            <p className="sign-up-text">
+              Already have an account? <Link to="/login">Log in</Link>
+            </p>
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 }

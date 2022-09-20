@@ -1,0 +1,14 @@
+.chip-icon {
+    width: 48px;
+    height: 48px;
+    border: 8px solid #FBF8E9;
+    background: #F7F2D3;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.chip-icon > img {
+    width: 32px;
+    height: 20px;
+}

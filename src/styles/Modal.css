@@ -1,0 +1,90 @@
+.modalContainer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #e0e0e0;
+    opacity: 0.95;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.25s ease-in-out;
+}
+#additional {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+.modalContainer .modal {
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: 320px;
+    padding: 2rem;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 1);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 20px 24px -4px rgba(16, 24, 40, 0.08), 0 8px 8px -4px rgba(16, 24, 40, 0.03);
+}
+.modalContainer .modal_header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.modalContainer .modal_header-title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+.modalContainer .modal_header-subtitle {
+    color: #667085;
+    font-size: 14px;
+    font-weight: normal;
+    text-align: center;
+    margin-top: 5px;
+}
+.modalContainer .modal_content {
+    padding: 1rem 0;
+}
+.modalContainer .modal_footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    margin-top: auto;
+}
+.modalContainer .modal_footer button {
+    border-radius: 8px;
+    display: flex;
+    flex: 1 0 50%;
+}
+.modalContainer .modal_footer button:first-child {
+    margin-right: .5rem;
+}
+.modalContainer .modal_footer .modal-close {
+    background-color: transparent;
+    font-weight: 600;
+}
+.modalContainer .modal_footer .modal-close:hover {
+    color: rgba(54, 67, 72, 0.8);
+}
+.modalContainer .modal_footer .submit {
+    margin-right: 1rem;
+    background-color: #364348;
+    color: #fff;
+}
+.modalContainer .modal_footer .submit:hover {
+    background-color: rgba(54, 67, 72, 0.8);
+}
+
