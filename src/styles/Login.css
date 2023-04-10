@@ -1,0 +1,58 @@
+.login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+}
+.form-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+}
+.form-heading {
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 0;
+    color: #101828;
+}
+.button > img {
+    width: 24px;
+    height: 19px;
+}
+.forgot-password {
+    cursor: pointer;
+    color: #d8bc21;
+    text-decoration: none;
+}
+.fe {
+    display: flex;
+    justify-content: flex-end;
+    width: 385px;
+    padding: 20px 0;
+}
+.sign-up-text {
+    text-align: center;
+}
+.sign-up-text > a {
+    color: #D8BC21;
+    text-decoration: none;
+}
+.line:before,
+.line:after {
+    content:"\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0";
+    text-decoration: line-through;
+    color: #EAECF0;
+}
+.line:before {
+    margin-right: 10px;
+}
+.line:after {
+    margin-left: 10px;
+}
+.line {
+    color: #667085;
+}
+.form {
+    width: 385px;
+}

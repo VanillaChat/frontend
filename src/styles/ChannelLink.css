@@ -1,0 +1,75 @@
+.channel-link {
+    text-decoration: none;
+    color: #000;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 10px 13px;
+    display: flex;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: all .1s ease-in-out;
+    text-align: center;
+    align-items: center;
+}
+path {
+    stroke: #888;
+}
+.icon-div {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+    margin-right: -5px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+path:hover {
+    stroke: #000;
+}
+.channel-link:hover > .icon-div {
+    display: flex;
+}
+.icon-div:hover > svg > path {
+    stroke: #000;
+}
+.icon-div:hover > svg > g > path {
+    stroke: #000;
+}
+.channel-link:hover {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+}
+.channel-link:active {
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+}
+.channel-link.active {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+}
+.channel-link.active:hover {
+    background: #efefef;
+    border: 1px solid #e0e0e0;
+}
+.channel-link.active:active {
+    background: #e8e8e8;
+    border: 1px solid #e0e0e0;
+}
+.custom-status {
+    font-size: 12px;
+}
+.channel-link > .icon {
+    margin-right: 8px;
+    border-radius: 100%;
+}
+.name-and-custom-status {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+.name {
+    font-weight: 500;
+}

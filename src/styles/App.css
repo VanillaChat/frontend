@@ -1,0 +1,55 @@
+main#app {
+    background: #E0E0E0!important;
+    display: flex;
+    flex-direction: row;
+}
+.channel-info {
+    background: #FBFBFB;
+    /*width: 100vh;*/
+    height: 20px;
+    padding: 20px 25px;
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid #e0e0e0;
+    align-items: center;
+}
+.icon {
+    font-size: 24px;
+    font-weight: normal;
+    margin: 0;
+}
+.channel-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 5px 5px;
+}
+.chat-pane {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+}
+.text-input {
+    display: flex;
+    justify-self: end!important;
+    align-self: end!important;
+}
+.chat-input {
+    display: flex;
+    margin-bottom: 10px;
+    width: 98%;
+    height: 45px;
+    text-align: center;
+    justify-self: center;
+    align-self: center;
+    bottom: 0;
+    margin-top: 86vh;
+}
+.chat-input > input {
+    resize: none!important;
+    box-shadow: none!important;
+    border: 1px solid #D3D2C8;
+    background: #FFFEFA;
+}
+.chat-input > input::placeholder {
+    color: #a8a8a8;
+}
