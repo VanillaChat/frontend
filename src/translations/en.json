@@ -1,0 +1,95 @@
+{
+  "placeholder": {
+    "username": "MySuperCoolName1234"
+  },
+  "common": {
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "or": "OR",
+    "repeatPassword": "Repeat Password",
+    "getStarted": "Get started",
+    "create": "Create",
+    "creating": "Creating...",
+    "join": "Join",
+    "joining": "Joining...",
+    "cancel": "Cancel",
+    "serverError": "Something went wrong.",
+    "inviteCode": "Invite Code"
+  },
+  "login": {
+    "title": "Log in to your account",
+    "subtitle": "Welcome back! Please enter your details.",
+    "emailPlaceholder": "Enter your email",
+    "forgotPassword": "Forgot password?",
+    "loginButton": "Sign in",
+    "signInWithDiscord": "Sign in with Discord",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "loggingIn": "Signing in...",
+    "errors": {
+      "invalidEmail": "A valid email must be specified.",
+      "invalidPassword": "A password must be specified.",
+      "incorrectDetails": "Incorrect email or password."
+    }
+  },
+  "register": {
+    "title": "Create an account",
+    "subtitle": "Welcome to {appName}!",
+    "useDiscord": "Use Discord to create my account",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Log in",
+    "creatingAccount": "Creating account...",
+    "errors": {
+      "invalidUsername": "A username must be specified.",
+      "usernameTooShort": "Username must be at least {minLength, plural, one {1 character} other {# characters}} long.",
+      "usernameTooLong": "Username must be at most {maxLength, plural, one {1 character} other {# characters}} long.",
+      "invalidPassword": "A password must be specified.",
+      "passwordTooShort": "Password must be at least {minLength, plural, one {1 character} other {# characters}} long.",
+      "passwordTooLong": "Password must be at most {maxLength, plural, one {1 character} other {# characters}} long.",
+      "passwordLowercase": "Password must contain at least one lowercase character.",
+      "passwordUppercase": "Password must contain at least one uppercase character.",
+      "passwordDigit": "Password must contain at least one digit.",
+      "passwordSpecialCharacter": "Password must contain at least one special character.",
+      "passwordConfirmation": "Confirm your password.",
+      "passwordNotConfirmed": "Confirm password must match password.",
+      "usernameTagTooPopular": "This combination of username and tag already exists. Try again.",
+      "inviteCodeRequired": "An invite code is required to register.",
+      "inviteCodeNotFound": "Invalid invite code."
+    }
+  },
+  "forgotPassword": {
+    "title": "Forgot your password?",
+    "subtitle": "No problem, just input your email in the form and we’ll send you a reset link to your email address.",
+    "resetPassword": "Reset my password",
+    "goBack": "Go back",
+    "goBackTitle": "Recalled your password yet?"
+  },
+  "app": {
+    "me": {
+      "directMessages": "Direct messages",
+      "friends": "Friends",
+      "dmSearch": "Search for DMs"
+    },
+    "modals": {
+      "serverCreate": {
+        "title": "Create a Server",
+        "subtitle": "A Server consists of multiple users that can talk about different topics in rooms called Channels.",
+        "name": "Server Name",
+        "brief": "Server Brief",
+        "icon": "Upload an icon!",
+        "defaultName": "{username}'s Server",
+        "defaultBrief": "This is a brief!"
+      },
+      "serverJoin": {
+        "title": "Join a Server",
+        "invite": "Server Invite",
+        "inviteRequired": "Invite is required."
+      }
+    },
+    "chat": {
+      "noMessages": "At the beginning, there was silence...",
+      "noMessagesDescription": "Be the first to send something!"
+    }
+  }
+}
