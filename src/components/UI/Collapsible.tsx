@@ -1,4 +1,3 @@
-import "../../styles/UI/Collapsible.css";
 import {ReactNode, useState} from "react";
 import collapse from "../../icons/collapse.svg";
 

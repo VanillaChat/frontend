@@ -1,4 +1,3 @@
-import "../../styles/UI/Alert.css";
 import clsx from "clsx";
 
 export type AlertProps = {

@@ -1,5 +1,3 @@
-import "@//styles/App/App.css";
-import "@/styles/UI/Sidebar.css";
 import {Outlet, useNavigate, useParams} from "react-router-dom";
 import ChannelSidebar from "@/components/App/servers/ChannelSidebar";
 import GuildSidebar from "@/components/App/ServerSidebar";
@@ -36,7 +34,7 @@ export default function AppGuildLayout() {
   // );
 
     return (
-        <main id="app" className="h-[100dvh]">
+        <main id="app" className="h-[100dvh] flex flex-row">
             <div className="flex shrink-0">
                 <GuildSidebar />
                 <ChannelSidebar />

@@ -1,5 +1,4 @@
 import React from "react";
-import "@/styles/Pages/Index.css";
 import useMeta from "../hooks/useMeta";
 import Table from "@/components/UI/Table";
 

@@ -1,5 +1,4 @@
 import React from "react";
-import "../../../styles/App/MemberList.css";
 
 const MemberList: React.FC = () => {
   return (

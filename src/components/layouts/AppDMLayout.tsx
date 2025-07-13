@@ -1,5 +1,3 @@
-import "@/styles/App/App.css";
-import "@/styles/UI/Sidebar.css";
 import {Outlet, useParams,} from "react-router-dom";
 import MeSidebar from "@/components/App/me/MeSidebar";
 import GuildSidebar from "@/components/App/ServerSidebar";
@@ -26,7 +24,7 @@ export default function AppDMLayout() {
     // );
 
     return (
-        <main id="app" className="h-[100dvh] dark:!bg-[#262622] dim:!bg-[#141413]">
+        <main id="app" className="h-[100dvh] dark:!bg-[#262622] dim:!bg-[#141413] flex flex-row">
             <div className="flex shrink-0">
                 <GuildSidebar />
                 <MeSidebar />

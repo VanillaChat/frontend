@@ -1,4 +1,3 @@
-import "../../styles/App/App.css";
 import {useGateway} from "@/store/gateway";
 import {Outlet} from "react-router-dom";
 import ReconnectingWebSocket, {CloseEvent} from "@/utils/websocket/ReconnectingWebSocket";

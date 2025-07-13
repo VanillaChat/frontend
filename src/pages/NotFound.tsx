@@ -1,7 +1,6 @@
 import React from "react";
 import Button from "../components/UI/Button";
 import ArrowLeft from "../icons/arrow-left.svg";
-import "../styles/Pages/NotFound.css";
 import {useLocation, useNavigate} from "react-router-dom";
 import XIcon from "../icons/x-icon.svg";
 

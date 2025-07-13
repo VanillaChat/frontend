@@ -1,5 +1,3 @@
-import "../../styles/UI/ChipIcon.css";
-
 type ChipIconProps = {
   icon: string;
 };

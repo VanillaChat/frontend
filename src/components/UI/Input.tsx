@@ -1,5 +1,4 @@
 import React, {HTMLInputTypeAttribute} from "react";
-import "../../styles/UI/Input.css";
 import {FieldError, FieldValues, Path, UseFormRegister} from "react-hook-form";
 import {ClassValue} from "clsx";
 import {FaExclamationCircle} from "react-icons/fa";

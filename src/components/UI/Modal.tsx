@@ -2,7 +2,6 @@ import {createPortal} from "react-dom";
 import {ReactNode, ReactPortal, useEffect} from "react";
 import Button from "./Button";
 import {AnimatePresence, motion} from "framer-motion";
-import "../../styles/UI/Modal.css";
 import Server from "../../icons/Server.svg";
 import ChipIcon from "./ChipIcon";
 import {useTranslation} from "react-i18next";

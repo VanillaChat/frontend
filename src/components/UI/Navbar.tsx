@@ -1,5 +1,4 @@
 import * as React from "react";
-import "@/styles/UI/Navbar.css";
 import logo from "@/icons/squarelogo.png";
 import {NavLink} from "react-router-dom";
 import Button from "@/components/UI/Button";

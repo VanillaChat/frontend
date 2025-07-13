@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from "react";
 import logo from "@/icons/squarelogo.png";
-import "@/styles/Pages/Login.css";
 import {FormInput} from "@/components/UI/Input";
 import Button from "@/components/UI/Button";
 import {useTranslation} from "react-i18next";

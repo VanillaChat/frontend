@@ -1,4 +1,3 @@
-import "@/styles/UI/Message.css";
 import React from "react";
 import cn from "@/utils/cn";
 import {User} from "@/types/User";
