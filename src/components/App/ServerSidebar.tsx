@@ -23,7 +23,7 @@ import {FaCopy, FaTrash} from "react-icons/fa";
 
 const ServerCreateSchema = z.object({
     name: z.string().min(2, "app.modals.serverCreate.nameMinChars").max(64, "app.modals.serverCreate.nameMaxChars"),
-    brief: z.string().min(2, "app.modals.serverCreate.briefMinChars").max(24, "app.modals.serverCreate.briefMinChars"),
+    brief: z.string().min(2, "app.modals.serverCreate.briefMinChars").max(36, "app.modals.serverCreate.briefMinChars"),
 });
 
 const ServerJoinSchema = z.object({
