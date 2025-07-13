@@ -23,7 +23,7 @@ import {FaCopy, FaTrash} from "react-icons/fa";
 
 const ServerCreateSchema = z.object({
     name: z.string().min(2, "app.modals.serverCreate.nameMinChars").max(64, "app.modals.serverCreate.nameMaxChars"),
-    brief: z.string().min(2, "app.modals.serverCreate.briefMinChars").max(16, "app.modals.serverCreate.briefMinChars"),
+    brief: z.string().min(2, "app.modals.serverCreate.briefMinChars").max(24, "app.modals.serverCreate.briefMinChars"),
 });
 
 const ServerJoinSchema = z.object({
@@ -357,41 +357,41 @@ const ServerAddModal: React.FC = () => {
             subtitle={t("app.modals.serverCreate.subtitle")}
         >
             {globalError && <Alert variant="destructive" title="Server error">{t(globalError)}</Alert>}
-            <form onSubmit={mode === 'create' ? handleSubmitCreate(onSubmitCreate) : handleSubmitJoin(onSubmitJoin)}>
-                <Tabs
-                    activeTab={mode}
-                    setActiveTab={setMode}
-                    data={[
-                        {
-                            name: t('common.create'),
-                            id: 'create',
-                            contents: <>
-                                <FormInput
-                                    type="text"
-                                    placeholder={t('app.modals.serverCreate.name')}
-                                    label={t("app.modals.serverCreate.name")}
-                                    name="name"
-                                    id="name"
-                                    labelStyle={{ marginTop: "15px" }}
-                                    register={registerCreate}
-                                    translatedError={{error: errorsCreate.name!}}
-                                />
-                                <FormInput
-                                    type="text"
-                                    placeholder={t('app.modals.serverCreate.brief')}
-                                    label={t("app.modals.serverCreate.brief")}
-                                    name="brief"
-                                    id="brief"
-                                    labelStyle={{ marginTop: "15px" }}
-                                    register={registerCreate}
-                                    translatedError={{error: errorsCreate.brief!}}
-                                />
-                            </>
-                        },
-                        {
-                            name: t('common.join'),
-                            id: 'join',
-                            contents: <FormInput
+            <Tabs
+                activeTab={mode}
+                setActiveTab={setMode}
+                data={[
+                    {
+                        name: t('common.create'),
+                        id: 'create',
+                        contents: <form onSubmit={handleSubmitCreate(onSubmitCreate)}>
+                            <FormInput
+                                type="text"
+                                placeholder={t('app.modals.serverCreate.name')}
+                                label={t("app.modals.serverCreate.name")}
+                                name="name"
+                                id="name"
+                                labelStyle={{ marginTop: "15px" }}
+                                register={registerCreate}
+                                translatedError={{error: errorsCreate.name!}}
+                            />
+                            <FormInput
+                                type="text"
+                                placeholder={t('app.modals.serverCreate.brief')}
+                                label={t("app.modals.serverCreate.brief")}
+                                name="brief"
+                                id="brief"
+                                labelStyle={{ marginTop: "15px" }}
+                                register={registerCreate}
+                                translatedError={{error: errorsCreate.brief!}}
+                            />
+                        </form>
+                    },
+                    {
+                        name: t('common.join'),
+                        id: 'join',
+                        contents: <form onSubmit={handleSubmitJoin(onSubmitJoin)}>
+                            <FormInput
                                 type="text"
                                 placeholder={t('app.modals.serverJoin.invite')}
                                 label={t("app.modals.serverJoin.invite")}
@@ -401,10 +401,10 @@ const ServerAddModal: React.FC = () => {
                                 register={registerJoin}
                                 translatedError={{error: errorsJoin.invite!}}
                             />
-                        }
-                    ]}
-                />
-            </form>
+                        </form>
+                    }
+                ]}
+            />
         </Modal>
     </>
 }
