@@ -12,6 +12,9 @@ export default function onReady(ws: ReconnectingWebSocket, data: Payload) {
         currentUser: data.d.user,
         currentAccount: data.d.account
     });
+    localStorage.setItem('theme', data.d.settings.theme.toLowerCase());
+    document.querySelector('html')?.classList.remove('dark', 'dim');
+    document.querySelector('html')?.classList.add(data.d.settings.theme.toLowerCase());
     useGateway.getState().setConnectionStatus(true);
     useServers.getState().set(data.d.guilds);
     for (const guild of data.d.guilds as (Server & {channels: Channel[]})[]) {
