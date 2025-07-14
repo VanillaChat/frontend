@@ -26,7 +26,7 @@ type MessageProps = {
 };
 
 export function formatDate(input: Date | string) {
-  const date = dayjs(input).utc();
+  const date = dayjs(input).utc().local();
 
   if (date.isToday()) {
     return `Today at ${date.format("HH:mm")}`;
