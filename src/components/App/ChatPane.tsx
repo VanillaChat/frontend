@@ -86,8 +86,8 @@ const ChatPane: React.FC = () => {
           content: messages.savedContent[channelId!],
           createdAt: date,
           author: {
-            id: session.currentUser?.id,
-            username: session.currentUser?.username
+            id: session.currentUser!.id,
+            username: session.currentUser!.username
           },
           type: 'DEFAULT'
         });
