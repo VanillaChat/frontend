@@ -70,7 +70,7 @@ export default function Message(props: MessageProps) {
         {!isCompact && <img
           width="42px"
           height="42px"
-          src="https://cdn.discordapp.com/avatars/309427040908476416/f04949f40541d7036f687933d482a8dc.webp?size=1024"
+          src={`${import.meta.env.VITE_API_URL}/cdn/embed/avatars/${(BigInt(props.author.id!) >> 22n) % 6n}.png`}
           alt="channel icon"
           className="mr-[8px] rounded-full shrink-0"
         />}

@@ -71,7 +71,7 @@ const FullScreen = ({
                             }}
                             className={serverLinkStyle({
                                 isActive: false,
-                                className: 'absolute right-0 mr-8 mt-11 w-[42px] h-[42px] rounded-[12px]'
+                                className: 'absolute right-0 mr-12 mt-11 w-[42px] h-[42px] rounded-[12px]'
                             })}
                         >
                             <FaXmark />
