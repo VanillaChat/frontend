@@ -76,7 +76,6 @@ const ChatPane: React.FC = () => {
   }, [length]);
 
   const onPostMessage = useCallback(async (event: React.KeyboardEvent) => {
-    const date = new Date(Date.now());
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (messages.savedContent[channelId!].trim().length > 0) {
@@ -84,7 +83,7 @@ const ChatPane: React.FC = () => {
         const nonce = messages.data[channelId!]?.at(-1)?.id ?? "0";
         const message = messages.pushOptimistic(channelId!, {
           content: messages.savedContent[channelId!],
-          createdAt: date,
+          createdAt: new Date(Date.now()),
           author: {
             id: session.currentUser!.id,
             username: session.currentUser!.username
@@ -166,6 +165,12 @@ const ChatPane: React.FC = () => {
           <p className="text-[1rem]">{t("app.chat.noMessagesDescription")}</p>
         </div>
       )}
+      {
+        messages.typingIndicators[channelId!]?.length > 0 &&
+          <div className="mb-2 rounded-[8px] py-[4px] px-[10px] transition-all duration-[.2s] focus:border-[#dbddd0] dark:bg-[#393830] dark:border-[#464540] dark:text-white dim:bg-[#181815] dim:border-[#302F2A] dim:text-white border-[1px] border-[#D3D2C8] bg-[#fffefa] w-[98%] flex self-center">
+            <small className="text-[10px]">{t('app.chat.typing', {user1: messages.typingIndicators[channelId!][0], user2: messages.typingIndicators[channelId!][1], count: messages.typingIndicators[channelId!].length, remainingCount: Math.max(0, messages.typingIndicators[channelId!].length - 2)})}</small>
+          </div>
+      }
       <Input
         placeholder={`Message #${channel?.name}`}
         containerClass="flex mb-[10px] w-[98%] h-[45px] text-center justify-self-center self-center mt-auto [&>input]:resize-none [&>input>:shadow-none"

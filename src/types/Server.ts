@@ -1,3 +1,5 @@
+import {User} from "@/types/User";
+
 export type Server = {
   id: string;
   name: string;
@@ -13,4 +15,10 @@ export type Channel = {
   name: string;
   createdAt: string;
   guildId: string;
+}
+
+export type ServerMember = {
+  id: string;
+  nickname: string;
+  user: User;
 }

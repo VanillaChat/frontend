@@ -89,7 +89,8 @@
     },
     "chat": {
       "noMessages": "At the beginning, there was silence...",
-      "noMessagesDescription": "Be the first to send something!"
+      "noMessagesDescription": "Be the first to send something!",
+      "typing": "{count, plural, =0 {} =1 {{user1} is typing} =2 {{user1} and {user2} are typing} other {{user1}, {user2} and {remainingCount, plural, =1 {1 other} other {# others}} are typing}}..."
     }
   }
 }

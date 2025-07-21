@@ -2,10 +2,14 @@ import {create} from "zustand/react";
 import {Message} from "@/types/Message";
 import {devtools} from "zustand/middleware";
 import {nanoid} from "nanoid";
+import {User} from "@/types/User";
 
 export type MessageState = {
     data: Record<string, Message[]>;
     savedContent: {[key: string]:  string};
+    typingIndicators: {[key: string]: User[]};
+    addTypingIndicator: (channel: string, user: User) => void;
+    removeTypingIndicator: (channel: string, user: string) => void;
     setContent: (channel: string, content: string) => void;
     setMessages: (channel: string, messages: Message[]) => void;
     pushOptimistic: (channel: string, message: Omit<Message, 'id' | 'state'>) => {
@@ -20,8 +24,16 @@ export type MessageState = {
 export const useMessages = create<MessageState>()(devtools((set, get) => ({
     data: {},
     savedContent: {},
+    typingIndicators: {},
     setMessages: (channel: string, messages: Message[]) => set((state) => ({
-        data: {...state.data, [channel]: messages}
+        data: {...state.data, [channel]: messages},
+        typingIndicators: {[channel]: []}
+    })),
+    addTypingIndicator: (channel: string, user: User) => set((state) => ({
+        typingIndicators: {...state.typingIndicators, [channel]: [...state.typingIndicators[channel], user]},
+    })),
+    removeTypingIndicator: (channel: string, user: string) => set((state) => ({
+        typingIndicators: {...state.typingIndicators, [channel]: state.typingIndicators[channel].filter(x => x.id !== user)}
     })),
     pushOptimistic: (channel: string, message: Message) => {
         const tempId = nanoid();
@@ -59,5 +71,5 @@ export const useMessages = create<MessageState>()(devtools((set, get) => ({
     setContent: (channel: string, content: string) => set((state) => ({
         savedContent: {...state.savedContent, [channel]: content}
     })),
-    clearCache: () => set({data: {}, savedContent: {}})
+    clearCache: () => set({data: {}, savedContent: {}, typingIndicators: {}})
 })));

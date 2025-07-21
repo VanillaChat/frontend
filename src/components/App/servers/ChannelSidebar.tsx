@@ -14,7 +14,7 @@ const ChannelSidebar: React.FC = () => {
         if (!server) navigate('/channels/@me');
     }, [server]);
 
-    useMeta(`#${channels.find(channel => channel.id === channelId)?.name} - ${server!.name}`);
+    useMeta(`#${channels?.find(channel => channel.id === channelId)?.name} - ${server?.name}`);
 
     if (server) {
         return <div className="w-[300px] bg-[#f2f2f2] dark:bg-[#2C2B27] dim:bg-[#070707] p-[20px_10px]">

@@ -3,7 +3,7 @@ import {NavLink, useNavigate} from "react-router-dom";
 import Modal from "../UI/Modal";
 import {FormInput} from "../UI/Input";
 import {useTranslation} from "react-i18next";
-import {useChannels, useServers} from "@/store/servers";
+import {useChannels, useMembers, useServers} from "@/store/servers";
 import cn from "@/utils/cn";
 import {SubmitHandler, useForm} from "react-hook-form";
 import z from "zod/v4";
@@ -160,11 +160,12 @@ const AdminPane = (props: {currentTab?: 'overview' | 'users' | 'instance-setting
             credentials: 'include'
         });
         if (res.status === 200) {
+            const code = await res.json();
             appStore.setSettings({
                 inviteCodes: [
                     ...appStore.settings.inviteCodes,
                     {
-                        ...await res.json(),
+                        ...code,
                         createdBy: session.currentUser
                     }
                 ]
@@ -196,9 +197,8 @@ const AdminPane = (props: {currentTab?: 'overview' | 'users' | 'instance-setting
             }
             <Tab active={currentTab === 'instance-settings'} onClick={() => setCurrentTab('instance-settings')}>Instance Configuration</Tab>
         </div>
-        <div className="w-full mx-6 my-10 flex flex-col gap-5">
+        <div className="w-full mx-6 my-10 flex flex-col gap-5 overflow-auto">
             <h1 className="font-bold text-[22px]">{currentTab!.split('-').map(str => str[0].toUpperCase() + str.slice(1).toLowerCase()).join(' ')}</h1>
-
             {
                 currentTab === 'invite-codes' &&
                 <>
@@ -240,9 +240,10 @@ const ServerAddModal: React.FC = () => {
     const { t } = useTranslation();
     const user = useSession(session => session.currentUser);
     const servers = useServers();
+    const channels = useChannels();
+    const members = useMembers();
     const navigate = useNavigate();
     const [globalError, setGlobalError] = React.useState<string | null>(null);
-    const channels = useChannels();
     const [mode, setMode] = React.useState<'create' | 'join'>('create');
     const appStore = useAppStore();
     const {
@@ -310,6 +311,7 @@ const ServerAddModal: React.FC = () => {
             if (guild.status === 200) {
                 servers.insert(json.guild);
                 channels.set(json.guild.id, json.guild.channels);
+                members.setMembers(json.guild.id, json.guild.members);
                 setModal(false);
                 appStore.setHasModal(false);
                 navigate(`/channels/${json.guild.id}/${json.guild.channels[0].id}`);

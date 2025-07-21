@@ -1,5 +1,5 @@
 import {create} from "zustand/react";
-import {Channel, Server} from "@/types/Server";
+import {Channel, Server, ServerMember} from "@/types/Server";
 import {devtools} from "zustand/middleware";
 
 export type ServersState = {
@@ -55,3 +55,28 @@ export const useChannels = create<ChannelsState>()(devtools((set) => ({
         data: {...state.data, [serverId]: data}
     }))
 })));
+
+export type MembersState = {
+    data: Record<string, ServerMember[]>;
+    setMembers: (serverId: string, members: ServerMember[]) => void;
+    addMember: (serverId: string, member: ServerMember) => void;
+}
+
+export const useMembers = create<MembersState>()(devtools((set) => ({
+    data: {},
+    setMembers: (serverId: string, members: ServerMember[]) => set((state) => ({
+        data: {...state.data, [serverId]: members}
+    })),
+    addMember: (serverId: string, member: ServerMember) => set((state) => {
+        const newArray = [...(state.data[serverId] ?? [])];
+        const index = newArray.findIndex(m => m.id === member.id);
+        if (index !== -1) {
+            newArray[index] = member;
+        } else {
+            newArray.push(member);
+        }
+        return {
+            data: {...state.data, [serverId]: newArray}
+        }
+    })
+})))

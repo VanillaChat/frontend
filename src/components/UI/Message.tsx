@@ -42,20 +42,16 @@ export function formatDate(input: Date | string) {
 export default function Message(props: MessageProps) {
   const messages = useMessages();
   const previous = messages.data[props.channelId]?.[props.index - 1];
-  // const today = new Date();
-  // const yesterday = new Date();
-  // const tomorrow = new Date();
-  // yesterday.setDate(today.getDate() - 1);
-  // tomorrow.setDate(today.getDate() + 1);
-  // const isToday = props.createdAt.toDateString() === today.toDateString();
-  // const isYesterday =
-  //   props.createdAt.toDateString() === yesterday.toDateString();
-  // const isTomorrow = props.createdAt.toDateString() === tomorrow.toDateString();
+
+
+  // console.log(dayjs(props.createdAt));
+  // console.log(dayjs(previous?.createdAt));
+  // console.log(dayjs(props.createdAt).diff(previous?.createdAt, 'minutes'));
 
   const isCompact = (
       previous &&
           previous.author.id === props.author.id &&
-          props.createdAt.getTime() - new Date(previous.createdAt).getTime() < 300_000
+          dayjs(previous.createdAt).diff(props.createdAt, 'minutes') < 5
   ) || false;
 
   return (
