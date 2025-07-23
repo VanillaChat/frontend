@@ -72,9 +72,14 @@ export let router = createBrowserRouter([
                     },
                     {
                         path: ':channelId',
-                        loader: async () => {
+                        loader: async ({ params }) => {
+                            const messages = useMessages.getState();
+                            if (typeof messages.data[params.channelId!] !== 'undefined') return messages.data[params.channelId!];
+                            const res = await fetch(`${import.meta.env.VITE_API_URL}/channels/${params.channelId!}/messages`, {
+                                credentials: 'include'
+                            });
                             return {
-                                messages: []
+                                messages: res.status === 200 ? await res.json() : []
                             }
                         },
                         element: <>
