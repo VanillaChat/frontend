@@ -172,16 +172,12 @@ export const useMessages = create<MessageState>()(devtools((set, get) => ({
         set({ isLoadingMore: true });
         
         try {
-            
             const url = `${import.meta.env.VITE_API_URL}/channels/${channel}/messages?before=${oldestMessageId}`;
-            
             const response = await fetch(url, { credentials: 'include' });
-            
             if (!response.ok) {
                 console.log(`Failed to fetch older messages: ${response.status} ${response.statusText}`);
                 return;
             }
-            
             const olderMessages = await response.json();
             if (olderMessages.length === 0) {
                 set((state) => ({
@@ -197,7 +193,7 @@ export const useMessages = create<MessageState>()(devtools((set, get) => ({
             set((state) => ({
                 data: {
                     ...state.data,
-                    [channel]: [...olderMessages, ...state.data[channel]]
+                    [channel]: [...olderMessages.map((msg: any) => ({...msg, state: 'SENT'})), ...state.data[channel]]
                 },
                 hasMoreMessages: {
                     ...state.hasMoreMessages,
@@ -239,14 +235,11 @@ export const useMessages = create<MessageState>()(devtools((set, get) => ({
         try {
             const url = `${import.meta.env.VITE_API_URL}/channels/${channel}/messages?after=${newestMessageId}`;
             const response = await fetch(url, { credentials: 'include' });
-            
             if (!response.ok) {
                 console.log(`Failed to fetch newer messages: ${response.status} ${response.statusText}`);
                 return;
             }
-            
             const newerMessages = await response.json();
-
             if (newerMessages.length === 0) {
                 set((state) => ({
                     hasNewerMessages: {
@@ -261,7 +254,7 @@ export const useMessages = create<MessageState>()(devtools((set, get) => ({
             set((state) => ({
                 data: {
                     ...state.data,
-                    [channel]: [...state.data[channel], ...newerMessages]
+                    [channel]: [...state.data[channel], ...newerMessages.map((msg: any) => ({...msg, state: 'SENT'}))]
                 },
                 hasNewerMessages: {
                     ...state.hasNewerMessages,
