@@ -1,4 +1,4 @@
-import React, {useCallback} from "react";
+import React, {useCallback, useRef} from "react";
 import cn from "@/utils/cn";
 import {User} from "@/types/User";
 import {useEditCache, useMessages} from "@/store/messages";
@@ -41,7 +41,7 @@ const baseMessageStyle = (props: MessageProps, isCompact: boolean, editCache: Re
     }
 )
 
-function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolean; }) {
+function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolean; messageRef?: React.RefObject<HTMLDivElement | null>; }) {
     const editCache = useEditCache();
     const messages = useMessages();
     const { channelId } = useParams();
@@ -70,12 +70,15 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
         }
     }, [editCache.cache]);
 
-    return <li className={cn(
+    return <div className={cn(
         "w-[100%]",
         {
             [baseMessageStyle(props, props.isCompact, editCache)]: props.isBare
         }
-    )}>
+    )}
+               ref={props.messageRef}
+                data-message-id={props.id}
+    >
         <div className="flex flex-row items-start gap-[8px] w-[100%]">
             {!props.isCompact && <img
                 width="42px"
@@ -136,7 +139,7 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
         {/*<div className="hidden flex-row h-fit p-[8px_12px] bg-[#fff] border-[1px] border-[#e0e0e0] rounded-[8px] shadow-message translate-x-[22px] translate-y-[-32px] group-hover:flex">*/}
         {/*  <p style={{ margin: 0 }}>action</p>*/}
         {/*</div>*/}
-    </li>
+    </div>
 }
 
 export default function Message(props: MessageProps) {
@@ -149,12 +152,13 @@ export default function Message(props: MessageProps) {
     ) || false;
     const editCache = useEditCache();
     const session = useSession();
+    const ref = useRef<HTMLDivElement>(null);
 
   return (props.state !== "SENT" || editCache.cache.isEditing && editCache.cache.messageId === props.id) ?
-      <BaseMessage {...props} isCompact={isCompact} isBare />
+      <BaseMessage {...props} isCompact={isCompact} isBare messageRef={ref} />
     : <ContextMenu.Root>
         <ContextMenu.Trigger className={baseMessageStyle(props, isCompact, editCache)}>
-            <BaseMessage {...props} isCompact={isCompact} />
+            <BaseMessage {...props} isCompact={isCompact} messageRef={ref} />
         </ContextMenu.Trigger>
         <ContextMenu.Portal>
             <ContextMenu.Positioner className="outline-none">
@@ -174,11 +178,18 @@ export default function Message(props: MessageProps) {
                     {session.currentUser?.id === props.author.id && (
                         <>
                             <ContextMenu.Item
-                                onClick={() => editCache.set({
-                                    isEditing: true,
-                                    messageId: props.id,
-                                    content: props.content
-                                })}
+                                onClick={() => {
+                                    editCache.set({
+                                        isEditing: true,
+                                        messageId: props.id,
+                                        content: props.content
+                                    });
+                                    ref.current?.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "nearest",
+                                        inline: "nearest"
+                                    });
+                                }}
                                 className="flex cursor-pointer py-2 pr-8 pl-4 text-sm leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-gray-900 dim:data-[highlighted]:before:bg-[#2E2E2E] dark:data-[highlighted]:before:bg-[#454545]"
                             >
                                 Edit

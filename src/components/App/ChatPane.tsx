@@ -8,8 +8,6 @@ import {useLoaderData, useParams} from "react-router-dom";
 import {useSession} from "@/store/session";
 import {useChannels} from "@/store/servers";
 import {useAppStore} from "@/store/app";
-import {useVirtualizer} from "@tanstack/react-virtual";
-import dayjs from "dayjs";
 
 export const ChatPaneStub: React.FC = () => {
   const isDM = location.pathname.includes("@me");
@@ -33,6 +31,7 @@ export const ChatPaneStub: React.FC = () => {
 
 const ChatPane: React.FC = () => {
   const messages = useMessages();
+  const msgRef = useRef<HTMLUListElement>(null);
   const { channelId, guildId } = useParams();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { t } = useTranslation();
@@ -46,51 +45,36 @@ const ChatPane: React.FC = () => {
   const [prevScrollTop, setPrevScrollTop] = useState(0);
   const isInitialLoad = useRef(true);
   const isViewingOlderMessages = useRef(false);
-  const msgContainerRef = useRef<HTMLDivElement>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: messages.data[channelId!]?.length || 0,
-    getScrollElement: () => msgContainerRef.current,
-    estimateSize: (index) => {
-      const message = messages.data[channelId!][index];
-      const previousMessage = index > 0 ? messages.data[channelId!][index - 1] : null;
-
-      const isCompact = (
-          previousMessage &&
-          previousMessage.author.id === message.author.id &&
-          dayjs(previousMessage.createdAt).diff(message.createdAt, 'minutes') < 5
-      ) || false;
-
-      return isCompact ? 25 : 60;
-    },
-    overscan: 10,
-    paddingStart: 8,
-    paddingEnd: 8,
-  });
 
   const channel = channels?.find(ch => ch.id === channelId) || {name: 'test'};
 
   const handleScroll = useCallback(() => {
-    if (!msgContainerRef.current) return;
+    if (!msgRef.current) return;
+
     if (isInitialLoad.current) {
       return;
     }
-    if (msgContainerRef.current.scrollTop < 100 && !messages.isLoadingMore && messages.hasMoreMessages[channelId!]) {
+
+    if (msgRef.current.scrollTop < 100 && !messages.isLoadingMore && messages.hasMoreMessages[channelId!]) {
       isViewingOlderMessages.current = true;
-      setPrevScrollHeight(msgContainerRef.current.scrollHeight);
+      
+      setPrevScrollHeight(msgRef.current.scrollHeight);
       messages.loadMoreMessages(channelId!);
     }
-    const scrollBottom = msgContainerRef.current.scrollHeight - msgContainerRef.current.scrollTop - msgContainerRef.current.clientHeight;
+
+    const scrollBottom = msgRef.current.scrollHeight - msgRef.current.scrollTop - msgRef.current.clientHeight;
+
     if (scrollBottom < 200) {
       if (isViewingOlderMessages.current) {
         isViewingOlderMessages.current = false;
       }
     }
+    
     if (scrollBottom < 100 && !messages.isLoadingNewer && messages.hasNewerMessages[channelId!]) {
-      setPrevScrollTop(msgContainerRef.current.scrollTop);
+      setPrevScrollTop(msgRef.current.scrollTop);
       messages.loadNewerMessages(channelId!);
     }
-  }, [channelId, messages, msgContainerRef, setPrevScrollHeight, setPrevScrollTop, isInitialLoad]);
+  }, [channelId, messages, msgRef, setPrevScrollHeight, setPrevScrollTop, isInitialLoad]);
 
   useEffect(() => {
     if (!channelId) return;
@@ -106,7 +90,7 @@ const ChatPane: React.FC = () => {
   }, [channelId, loadedMessages, messages]);
 
   useEffect(() => {
-    const messageContainer = msgContainerRef.current;
+    const messageContainer = msgRef.current;
     if (messageContainer) {
       messageContainer.addEventListener('scroll', handleScroll);
       return () => messageContainer.removeEventListener('scroll', handleScroll);
@@ -114,22 +98,20 @@ const ChatPane: React.FC = () => {
   }, [handleScroll]);
 
   useEffect(() => {
-    if (!messages.isLoadingMore && msgContainerRef.current && prevScrollHeight > 0) {
+    if (!messages.isLoadingMore && msgRef.current && prevScrollHeight > 0) {
       requestAnimationFrame(() => {
-        const newScrollHeight = msgContainerRef.current!.scrollHeight;
+        const newScrollHeight = msgRef.current!.scrollHeight;
         const adjustment = newScrollHeight - prevScrollHeight;
 
         if (adjustment > 0) {
-          msgContainerRef.current!.scrollTop = adjustment;
-          rowVirtualizer.measure();
+          msgRef.current!.scrollTop = newScrollHeight - prevScrollHeight;
         } else {
           setTimeout(() => {
-            const delayedNewScrollHeight = msgContainerRef.current!.scrollHeight;
+            const delayedNewScrollHeight = msgRef.current!.scrollHeight;
             const delayedAdjustment = delayedNewScrollHeight - prevScrollHeight;
-
+            
             if (delayedAdjustment > 0) {
-              msgContainerRef.current!.scrollTop = delayedAdjustment;
-              rowVirtualizer.measure();
+              msgRef.current!.scrollTop = delayedNewScrollHeight - prevScrollHeight;
             }
           }, 100);
         }
@@ -139,63 +121,34 @@ const ChatPane: React.FC = () => {
         }, 200);
       });
     }
-  }, [messages.isLoadingMore, messages.data[channelId!], prevScrollHeight, channelId, rowVirtualizer]);
+  }, [messages.isLoadingMore, messages.data[channelId!], prevScrollHeight, channelId]);
 
   useEffect(() => {
-    if (!messages.isLoadingNewer && msgContainerRef.current && prevScrollTop > 0) {
-      msgContainerRef.current.scrollTop = prevScrollTop;
-      rowVirtualizer.measure();
+    if (!messages.isLoadingNewer && msgRef.current && prevScrollTop > 0) {
+      msgRef.current.scrollTop = prevScrollTop;
       setPrevScrollTop(0);
     }
-  }, [messages.isLoadingNewer, messages.data[channelId!], rowVirtualizer]);
+  }, [messages.isLoadingNewer, messages.data[channelId!]]);
 
   useEffect(() => {
-    if (msgContainerRef.current && isInitialLoad.current) {
+    if (msgRef.current && isInitialLoad.current) {
       setTimeout(() => {
-        if (msgContainerRef.current) {
-          msgContainerRef.current.scrollTop = msgContainerRef.current.scrollHeight;
-          rowVirtualizer.measure();
+        if (msgRef.current) {
+          msgRef.current.scrollTop = msgRef.current.scrollHeight;
           isInitialLoad.current = false;
         }
       }, 100);
     }
-  }, [channelId, messages.data[channelId!], rowVirtualizer]);
+  }, [channelId, messages.data[channelId!]]);
 
   useEffect(() => {
-    if (msgContainerRef.current && !messages.isLoadingMore && !prevScrollHeight && !isViewingOlderMessages.current && !isInitialLoad.current) {
-      const isNearBottom = msgContainerRef.current.scrollHeight - msgContainerRef.current.scrollTop - msgContainerRef.current.clientHeight < 200;
+    if (msgRef.current && !messages.isLoadingMore && !prevScrollHeight && !isViewingOlderMessages.current && !isInitialLoad.current) {
+      const isNearBottom = msgRef.current.scrollHeight - msgRef.current.scrollTop - msgRef.current.clientHeight < 200;
       if (isNearBottom) {
-        msgContainerRef.current.scrollTop = msgContainerRef.current.scrollHeight;
-        rowVirtualizer.measure();
+        msgRef.current.scrollTop = msgRef.current.scrollHeight;
       }
     }
-  }, [messages.data, messages.isLoadingMore, prevScrollHeight, rowVirtualizer]);
-
-  useEffect(() => {
-    if (!channelId) return;
-
-    const checkForNewerMessages = async () => {
-      if (!messages.data[channelId] || messages.data[channelId].length === 0) return;
-      const newestMessageId = messages.data[channelId][messages.data[channelId].length - 1].id;
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/channels/${channelId}/messages?after=${newestMessageId}&limit=1`,
-          { credentials: 'include' }
-        );
-        if (response.ok) {
-          const newerMessages = await response.json();
-          messages.setHasNewerMessages(channelId, newerMessages.length > 0);
-        }
-      } catch (error) {
-        console.error("Failed to check for newer messages:", error);
-      }
-    };
-
-    checkForNewerMessages();
-    const interval = setInterval(checkForNewerMessages, 30000);
-    
-    return () => clearInterval(interval);
-  }, [channelId, messages]);
+  }, [messages.data, messages.isLoadingMore, prevScrollHeight]);
   const length = document.querySelector('#where-modals')?.children.length;
   const handleFocus = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -237,7 +190,7 @@ const ChatPane: React.FC = () => {
           type: 'DEFAULT'
         });
         messages.setContent(channelId!, '');
-        msgContainerRef.current?.scrollIntoView({
+        msgRef.current?.scrollIntoView({
           behavior: "smooth",
           block: "end",
           inline: "nearest",
@@ -271,7 +224,7 @@ const ChatPane: React.FC = () => {
         <h1 className="text-[24px] font-normal m-0">{isDM ? "@" : "#"}</h1>
         <p className="text-[16px] font-medium">{isDM ? "John Doe" : channel?.name}</p>
       </div>
-      <div className="max-w-[100%] h-[88vh] pl-0 p-[10px] mb-3 m-0 flex flex-col justify-start items-start overflow-auto min-w-0 dark:bg-[#262622] dim:bg-[#141413]" ref={msgContainerRef}>
+      <ul className="max-w-[100%] h-[88vh] pl-0 p-[10px] m-0 flex flex-col justify-start items-start overflow-auto min-w-0 dark:bg-[#262622] dim:bg-[#141413]" ref={msgRef}>
         {messages.isLoadingMore && (
           <>
             <MessageSkeleton />
@@ -281,59 +234,24 @@ const ChatPane: React.FC = () => {
             <MessageSkeleton />
           </>
         )}
-        <div
-            className="w-full relative"
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`
-            }}
-        >
-          {
-            rowVirtualizer.getVirtualItems().map((virtualItem) => {
-              const message = messages.data[channelId!][virtualItem.index];
-              return (
-                  <div
-                      key={virtualItem.key}
-                      data-index={virtualItem.index}
-                      className="absolute top-0 left-0 w-full"
-                      style={{
-                        height: `${virtualItem.size}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                  >
-                    <Message
-                        author={message.author}
-                        content={message.content}
-                        createdAt={new Date(message.createdAt)}
-                        state={message.state}
-                        channelId={message.channelId!}
-                        updatedAt={message.updatedAt}
-                        key={virtualItem.key}
-                        index={virtualItem.index}
-                        id={message.id}
-                    />
-                  </div>
-              );
-            })
-          }
-          {/*{messages.data[channelId!]?.length > 0 ? (*/}
-          {/*  Array.from(messages.data[channelId!])*/}
-          {/*    .map((message, index) => (*/}
-          {/*      <Message*/}
-          {/*        author={message.author}*/}
-          {/*        content={message.content}*/}
-          {/*        createdAt={new Date(message.createdAt)}*/}
-          {/*        state={message.state}*/}
-          {/*        channelId={message.channelId!}*/}
-          {/*        updatedAt={message.updatedAt}*/}
-          {/*        key={index}*/}
-          {/*        index={index}*/}
-          {/*        id={message.id}*/}
-          {/*      />*/}
-          {/*    ))*/}
-          {/*) : (*/}
-          {/*  <div>fetching messages...</div>*/}
-          {/*)}*/}
-        </div>
+        {messages.data[channelId!]?.length > 0 ? (
+          Array.from(messages.data[channelId!])
+            .map((message, index) => (
+              <Message
+                author={message.author}
+                content={message.content}
+                createdAt={new Date(message.createdAt)}
+                state={message.state}
+                channelId={message.channelId!}
+                updatedAt={message.updatedAt}
+                key={index}
+                index={index}
+                id={message.id}
+              />
+            ))
+        ) : (
+          <div>fetching messages...</div>
+        )}
         {messages.isLoadingNewer && (
           <>
             <MessageSkeleton />
@@ -343,7 +261,7 @@ const ChatPane: React.FC = () => {
             <MessageSkeleton />
           </>
         )}
-      </div>
+      </ul>
       {(messages.data[channelId!]?.length ?? 0) === 0 && (
         <div className="font-medium text-center flex justify-center items-center flex-col h-[100%] dark:bg-[#262622] dim:bg-[#141413]">
           <svg
@@ -378,8 +296,8 @@ const ChatPane: React.FC = () => {
           <div 
             className="mb-2 rounded-[8px] py-[8px] px-[10px] transition-all duration-[.2s] focus:border-[#dbddd0] dark:bg-[#393830] dark:border-[#464540] dark:text-white dim:bg-[#181815] dim:border-[#302F2A] dim:text-white border-[1px] border-[#D3D2C8] bg-[#fffefa] w-[98%] flex self-center justify-center cursor-pointer hover:bg-[#f0f0e8] dark:hover:bg-[#49473f] dim:hover:bg-[#282828]"
             onClick={() => {
-              if (msgContainerRef.current) {
-                msgContainerRef.current.scrollTop = msgContainerRef.current.scrollHeight;
+              if (msgRef.current) {
+                msgRef.current.scrollTop = msgRef.current.scrollHeight;
                 messages.loadNewerMessages(channelId!);
               }
             }}
