@@ -34,7 +34,7 @@ export default function AppGuildLayout() {
   // );
 
     return (
-        <main id="app" className="h-[100dvh] flex flex-row">
+        <main id="app" className="h-[100dvh] flex flex-row" onContextMenu={(e) => e.preventDefault()}>
             <div className="flex shrink-0">
                 <GuildSidebar />
                 <ChannelSidebar />

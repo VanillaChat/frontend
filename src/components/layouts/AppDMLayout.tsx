@@ -24,7 +24,7 @@ export default function AppDMLayout() {
     // );
 
     return (
-        <main id="app" className="h-[100dvh] dark:!bg-[#262622] dim:!bg-[#141413] flex flex-row">
+        <main id="app" className="h-[100dvh] dark:!bg-[#262622] dim:!bg-[#141413] flex flex-row" onContextMenu={(e) => e.preventDefault()}>
             <div className="flex shrink-0">
                 <GuildSidebar />
                 <MeSidebar />

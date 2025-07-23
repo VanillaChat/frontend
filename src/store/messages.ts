@@ -73,3 +73,29 @@ export const useMessages = create<MessageState>()(devtools((set, get) => ({
     })),
     clearCache: () => set({data: {}, savedContent: {}, typingIndicators: {}})
 })));
+
+export type EditCache = {
+    isEditing: boolean;
+    messageId: string | null;
+    content: string | null;
+}
+
+export type EditCacheState = {
+    cache: EditCache;
+    set: (cache: EditCache) => void;
+    setContent: (content: string) => void;
+    clear: () => void;
+}
+
+export const useEditCache = create<EditCacheState>()(devtools((set) => ({
+    cache: {
+        isEditing: false,
+        messageId: null,
+        content: null
+    },
+    set: (cache: EditCache) => set(() => ({cache})),
+    setContent: (content: string) => set((state) => ({
+        cache: {...state.cache, content}
+    })),
+    clear: () => set(() => ({cache: {isEditing: false, messageId: null, content: null}}))
+})));

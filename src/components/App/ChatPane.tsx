@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useRef} from "react";
 import Input from "@/components/UI/Input";
 import Message from "@/components/UI/Message";
 import {useTranslation} from "react-i18next";
-import {useMessages} from "@/store/messages";
+import {useEditCache, useMessages} from "@/store/messages";
 import {useLoaderData, useParams} from "react-router-dom";
 import {useSession} from "@/store/session";
 import {useChannels} from "@/store/servers";
@@ -39,6 +39,7 @@ const ChatPane: React.FC = () => {
   const { messages: loadedMessages } = useLoaderData();
   const channels = useChannels(state => state.data[isDM ? session.currentUser!.id : guildId!]);
   const appStore = useAppStore();
+  const editCache = useEditCache();
 
   const channel = channels?.find(ch => ch.id === channelId) || {name: 'test'};
 
@@ -65,18 +66,19 @@ const ChatPane: React.FC = () => {
         event.key !== "Shift" &&
         !["Escape", "CapsLock", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key) &&
         length === 0 &&
-        !appStore.hasModal
+        !appStore.hasModal &&
+        !editCache.cache.isEditing
     ) {
       inputRef.current?.focus();
     }
-  }, [length, appStore.hasModal]);
+  }, [length, appStore.hasModal, editCache.cache.isEditing]);
   useEffect(() => {
     document.addEventListener("keydown", handleFocus);
     return () => document.removeEventListener("keydown", handleFocus);
-  }, [length]);
+  }, [length, editCache.cache.isEditing, appStore.hasModal]);
 
   const onPostMessage = useCallback(async (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey && !event.repeat) {
       event.preventDefault();
       if (messages.savedContent[channelId!].trim().length > 0) {
         if (typeof messages.data[channelId!] === "undefined") messages.setMessages(channelId!, []);
@@ -84,6 +86,7 @@ const ChatPane: React.FC = () => {
         const message = messages.pushOptimistic(channelId!, {
           content: messages.savedContent[channelId!],
           createdAt: new Date(Date.now()),
+          updatedAt: null,
           author: {
             id: session.currentUser!.id,
             username: session.currentUser!.username
@@ -136,8 +139,10 @@ const ChatPane: React.FC = () => {
                         createdAt={new Date(message.createdAt)}
                         state={message.state}
                         channelId={message.channelId!}
+                        updatedAt={message.updatedAt}
                         key={index}
                         index={index}
+                        id={message.id}
                     />
                 ))}
           </ul>

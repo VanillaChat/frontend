@@ -51,7 +51,7 @@ export default function AppLayout() {
     }, []);
 
     if (!gateway.isConnected) {
-        return <div className="flex justify-center items-center h-[100dvh] flex-col gap-[16px] dark:bg-[#262622] dim:bg-[#000000]">
+        return <div className="flex justify-center items-center h-[100dvh] flex-col gap-[16px] dark:bg-[#262622] dim:bg-[#000000]" onContextMenu={(e) => e.preventDefault()}>
             {/*<img src={logo} alt="logo" className="connecting-logo" />*/}
             <div className="px-[25px] text-[50px] text-black dark:text-white dim:text-white font-semibold rounded-[12px] font-logo animate-(--logo-animation) dark:animate-(--logo-animation-dark) dim:animate-(--logo-animation-dark)">
                 <span>V</span>

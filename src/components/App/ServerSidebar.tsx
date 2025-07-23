@@ -18,8 +18,8 @@ import {RiQuestionFill} from "react-icons/ri";
 import Button, {buttonStyles} from "@/components/UI/Button";
 import {createColumnHelper} from "@tanstack/react-table";
 import Table from "@/components/UI/Table";
-import {formatDate} from "@/components/UI/Message";
 import {FaCopy, FaTrash} from "react-icons/fa";
+import {formatDate} from "@/utils/formatDate";
 
 const ServerCreateSchema = z.object({
     name: z.string().min(2, "app.modals.serverCreate.nameMinChars").max(64, "app.modals.serverCreate.nameMaxChars"),
@@ -197,7 +197,7 @@ const AdminPane = (props: {currentTab?: 'overview' | 'users' | 'instance-setting
             }
             <Tab active={currentTab === 'instance-settings'} onClick={() => setCurrentTab('instance-settings')}>Instance Configuration</Tab>
         </div>
-        <div className="w-full mx-6 my-10 flex flex-col gap-5 overflow-auto">
+        <div className="w-full mx-6 my-10 flex flex-col gap-5 overflow-auto" style={{ scrollbarGutter: "stable both-edges" }}>
             <h1 className="font-bold text-[22px]">{currentTab!.split('-').map(str => str[0].toUpperCase() + str.slice(1).toLowerCase()).join(' ')}</h1>
             {
                 currentTab === 'invite-codes' &&
