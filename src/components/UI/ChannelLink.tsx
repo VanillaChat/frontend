@@ -1,6 +1,13 @@
 import React, {ReactNode} from "react";
 import {NavLink} from "react-router-dom";
 import cn from "@/utils/cn";
+import trimString from "@/utils/trimString";
+import {useMessages} from "@/store/messages";
+import {PulseLoader} from "react-spinners";
+import {useTheme} from "@/context/ThemeProvider";
+import { Tooltip } from "@base-ui-components/react/tooltip";
+import { t } from "i18next";
+import {ArrowSvg} from "@/components/UI/Navbar";
 
 type ChannelLinkProps = {
   name: string;
@@ -15,9 +22,13 @@ type ChannelLinkProps = {
   onInviteClick?: () => void;
   isAvatar?: boolean;
   customStatus?: string;
+  channelId?: string;
 };
 
 const ChannelLink: React.FC<ChannelLinkProps> = (props: ChannelLinkProps) => {
+  const typingIndicators = useMessages(state => state.typingIndicators[props.channelId || '']);
+  const { theme } = useTheme();
+
   return (
     <NavLink
       to={props.to}
@@ -45,7 +56,7 @@ const ChannelLink: React.FC<ChannelLinkProps> = (props: ChannelLinkProps) => {
       {(props.customIcon && !props.icon) && props.customIcon}
       {(!props.icon && !props.customIcon) && <p className="mr-[4px] text-[24px]/[8px] font-normal">#</p>}
       <div className="flex flex-col justify-center items-start">
-        <span className="font-medium">{props.name || "Channel"}</span>
+        <span className="font-medium">{trimString(props.name) || "Channel"}</span>
         {props.customStatus && (
           <span className="text-[12px]">{props.customStatus}</span>
         )}
@@ -71,8 +82,34 @@ const ChannelLink: React.FC<ChannelLinkProps> = (props: ChannelLinkProps) => {
               </svg>
             </div>
         )}
+        {typingIndicators?.length > 0 &&
+            <Tooltip.Provider>
+              <div className="w-[20px] h-[20px] mr-[-5px] text-center items-center justify-center hidden group-hover:flex group-[.active]:flex">
+                <Tooltip.Root>
+                  <Tooltip.Trigger className="flex size-8 cursor-pointer items-center justify-center rounded-sm text-gray-900 select-none focus-visible:bg-none focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800  focus-visible:[&:not(:hover)]:bg-transparent">
+                    <PulseLoader color={theme === 'light' ? 'black' : 'white'} size={6} />
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Positioner sideOffset={10}>
+                      <Tooltip.Popup
+                          className={cn(
+                              "origin-[var(--transform-origin)] rounded-lg bg-[canvas] px-3 py-2 text-gray-900 shadow-lg shadow-gray-200 outline-1 outline-gray-200 transition-[transform,scale,opacity] data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0",
+                              "dim:bg-black dark:bg-[#262622] dark:text-white dim:text-white dark:shadow-none dark:-outline-offset-1 dark:outline-[#333333] dim:shadow-none dim:-outline-offset-1 dim:outline-[#2A2A2A]"
+                          )}
+                      >
+                        <Tooltip.Arrow className="data-[side=bottom]:top-[-8px] data-[side=left]:right-[-13px] data-[side=left]:rotate-90 data-[side=right]:left-[-13px] data-[side=right]:-rotate-90 data-[side=top]:bottom-[-8px] data-[side=top]:rotate-180">
+                          <ArrowSvg />
+                        </Tooltip.Arrow>
+                        {t('app.chat.typing', {user1: typingIndicators[0]?.username, user2: typingIndicators[1]?.username, count: typingIndicators?.length, remainingCount: Math.max(0, typingIndicators?.length - 2)})}
+                      </Tooltip.Popup>
+                    </Tooltip.Positioner>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </div>
+            </Tooltip.Provider>
+        }
         {props.invitable && (
-            <div className="w-[20px] h-[20px] mr-[-5px] text-center items-center justify-center hidden group-hover:flex group-[.active]:flex" onClick={props.onInviteClick}>
+            <div className="w-[20px] h-[20px] mr-[-5px] ml-1 text-center items-center justify-center hidden group-hover:flex group-[.active]:flex" onClick={props.onInviteClick}>
               <svg
                   width="24"
                   height="24"
@@ -86,7 +123,7 @@ const ChannelLink: React.FC<ChannelLinkProps> = (props: ChannelLinkProps) => {
             </div>
         )}
         {props.configurable && (
-            <div className="w-[20px] h-[20px] mr-[-5px] text-center items-center justify-center hidden group-hover:flex group-[.active]:flex" onClick={(e) => e.preventDefault()}>
+            <div className="w-[20px] h-[20px] mr-[-5px] ml-1 text-center items-center justify-center hidden group-hover:flex group-[.active]:flex" onClick={(e) => e.preventDefault()}>
               <svg
                   width="20"
                   height="20"

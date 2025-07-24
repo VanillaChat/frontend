@@ -5,6 +5,7 @@ import inviteCodeDelete, {inviteCodeUse} from "@/utils/websocket/handlers/dispat
 import presenceUpdate from "@/utils/websocket/handlers/dispatch/presenceUpdate";
 import guildMemberAdd from "@/utils/websocket/handlers/dispatch/guildMemberAdd";
 import {onMessageCreate, onMessageDelete, onMessageUpdate} from "@/utils/websocket/handlers/dispatch/messageEvents";
+import typingStart from "@/utils/websocket/handlers/dispatch/typingStart";
 
 export type Handler = (ws: ReconnectingWebSocket, data: Payload) => void;
 
@@ -16,5 +17,6 @@ export const dispatchHandlers: {[name: string]: Handler} = {
     INVITE_CODE_DELETE: inviteCodeDelete,
     INVITE_CODE_USE: inviteCodeUse,
     PRESENCE_UPDATE: presenceUpdate,
-    GUILD_MEMBER_ADD: guildMemberAdd
+    GUILD_MEMBER_ADD: guildMemberAdd,
+    TYPING_START: typingStart
 }

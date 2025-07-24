@@ -46,17 +46,33 @@ export const useMessages = create<MessageState>()(devtools((set, get) => ({
     lastLoadedNewestMessageId: {},
     setMessages: (channel: string, messages: Message[]) => {
         set((state) => ({
-            data: {...state.data, [channel]: messages},
-            typingIndicators: {[channel]: []}
+            data: {...state.data, [channel]: messages}
         }));
         get().trimMessages(channel);
     },
-    addTypingIndicator: (channel: string, user: User) => set((state) => ({
-        typingIndicators: {...state.typingIndicators, [channel]: [...state.typingIndicators[channel], user]},
-    })),
-    removeTypingIndicator: (channel: string, user: string) => set((state) => ({
-        typingIndicators: {...state.typingIndicators, [channel]: state.typingIndicators[channel].filter(x => x.id !== user)}
-    })),
+    addTypingIndicator: (channel: string, user: User) => set((state) => {
+        const channelTypingIndicators = state.typingIndicators[channel] || [];
+        
+        const userAlreadyTyping = channelTypingIndicators.some(typingUser => typingUser.id === user.id);
+        
+        if (!userAlreadyTyping) {
+            return {
+                typingIndicators: {...state.typingIndicators, [channel]: [...channelTypingIndicators, user]}
+            };
+        }
+        
+        return state;
+    }),
+    removeTypingIndicator: (channel: string, user: string) => set((state) => {
+        const channelTypingIndicators = state.typingIndicators[channel] || [];
+        
+        return {
+            typingIndicators: {
+                ...state.typingIndicators, 
+                [channel]: channelTypingIndicators.filter(x => x.id !== user)
+            }
+        };
+    }),
     pushOptimistic: (channel: string, message: Message) => {
         const tempId = nanoid();
 

@@ -48,6 +48,7 @@ const ChannelSidebar: React.FC = () => {
                         to={`/channels/${channel.guildId}/${channel.id}`}
                         key={channel.id}
                         invitable
+                        channelId={channel.id}
                         onInviteClick={async () => {
                             const res = await fetch(`${import.meta.env.VITE_API_URL}/channels/${channel.id}/invites`, {
                                 method: 'POST',

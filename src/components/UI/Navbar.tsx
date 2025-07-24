@@ -6,7 +6,7 @@ import {useSession} from "@/store/session";
 import { Popover } from "@base-ui-components/react/popover";
 import cn from "@/utils/cn";
 
-function ArrowSvg(props: React.ComponentProps<'svg'>) {
+export function ArrowSvg(props: React.ComponentProps<'svg'>) {
   return (
       <svg width="20" height="10" viewBox="0 0 20 10" fill="none" {...props}>
         <path

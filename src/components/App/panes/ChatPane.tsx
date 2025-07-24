@@ -8,6 +8,9 @@ import {useLoaderData, useParams} from "react-router-dom";
 import {useSession} from "@/store/session";
 import {useChannels} from "@/store/servers";
 import {useAppStore} from "@/store/app";
+import {PulseLoader} from "react-spinners";
+import {useTheme} from "@/context/ThemeProvider";
+import { throttle } from 'lodash';
 
 export const ChatPaneStub: React.FC = () => {
   const isDM = location.pathname.includes("@me");
@@ -45,6 +48,44 @@ const ChatPane: React.FC = () => {
   const [prevScrollTop, setPrevScrollTop] = useState(0);
   const isInitialLoad = useRef(true);
   const isViewingOlderMessages = useRef(false);
+  const { theme } = useTheme();
+  
+  const lastTypingTimeRef = useRef<{ [channelId: string]: number }>({});
+  
+  const sendTypingIndicator = useCallback(throttle(async (channelId: string) => {
+    const now = Date.now();
+    const lastTime = lastTypingTimeRef.current[channelId] || 0;
+    
+    if (now - lastTime > 9000 || !lastTypingTimeRef.current[channelId]) {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/channels/${channelId}/typing`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          lastTypingTimeRef.current[channelId] = now;
+        } else {
+          console.error('Failed to send typing indicator:', response.status, response.statusText);
+        }
+      } catch (error) {
+        console.error('Error sending typing indicator:', error);
+      }
+    }
+  }, 1000), []);
+  
+  const clearTypingIndicator = useCallback((channelId: string, userId?: string) => {
+    delete lastTypingTimeRef.current[channelId];
+  
+    if (userId) {
+      messages.removeTypingIndicator(channelId, userId);
+    } else if (session.currentUser) {
+      messages.removeTypingIndicator(channelId, session.currentUser.id);
+    }
+  }, [messages, session.currentUser]);
 
   const channel = channels?.find(ch => ch.id === channelId) || {name: 'test'};
 
@@ -177,6 +218,8 @@ const ChatPane: React.FC = () => {
     if (event.key === "Enter" && !event.shiftKey && !event.repeat) {
       event.preventDefault();
       if (messages.savedContent[channelId!].trim().length > 0) {
+        clearTypingIndicator(channelId!, session.currentUser!.id);
+        
         if (typeof messages.data[channelId!] === "undefined") messages.setMessages(channelId!, []);
         const nonce = messages.data[channelId!]?.at(-1)?.id ?? "0";
         const message = messages.pushOptimistic(channelId!, {
@@ -216,7 +259,7 @@ const ChatPane: React.FC = () => {
         }
       }
     }
-  }, [messages.data, messages.savedContent]);
+  }, [messages.data, messages.savedContent, clearTypingIndicator, channelId]);
 
   return (
     <div className="w-[100vw] flex flex-col dark:bg-[#262622] dim:bg-[#141413]">
@@ -287,8 +330,9 @@ const ChatPane: React.FC = () => {
       )}
       {
         messages.typingIndicators[channelId!]?.length > 0 &&
-          <div className="mb-2 rounded-[8px] py-[4px] px-[10px] transition-all duration-[.2s] focus:border-[#dbddd0] dark:bg-[#393830] dark:border-[#464540] dark:text-white dim:bg-[#181815] dim:border-[#302F2A] dim:text-white border-[1px] border-[#D3D2C8] bg-[#fffefa] w-[98%] flex self-center">
-            <small className="text-[10px]">{t('app.chat.typing', {user1: messages.typingIndicators[channelId!][0], user2: messages.typingIndicators[channelId!][1], count: messages.typingIndicators[channelId!].length, remainingCount: Math.max(0, messages.typingIndicators[channelId!].length - 2)})}</small>
+          <div className="mb-2 items-center gap-2 rounded-[8px] py-[4px] px-[10px] transition-all duration-[.2s] focus:border-[#dbddd0] dark:bg-[#393830] dark:border-[#464540] dark:text-white dim:bg-[#181815] dim:border-[#302F2A] dim:text-white border-[1px] border-[#D3D2C8] bg-[#fffefa] w-[98%] flex self-center">
+            <PulseLoader color={theme === 'light' ? 'black' : 'white'} size={6} />
+            <small className="text-[12px]">{t('app.chat.typing', {user1: messages.typingIndicators[channelId!][0]?.username, user2: messages.typingIndicators[channelId!][1]?.username, count: messages.typingIndicators[channelId!].length, remainingCount: Math.max(0, messages.typingIndicators[channelId!].length - 2)})}</small>
           </div>
       }
       {
@@ -318,7 +362,12 @@ const ChatPane: React.FC = () => {
         innerRef={inputRef}
         id="text-input"
         value={messages.savedContent[channelId!] ?? ''}
-        onChange={(e) => messages.setContent(channelId!, e.target.value)}
+        onChange={(e) => {
+          messages.setContent(channelId!, e.target.value);
+          if (e.target.value.trim().length > 0) {
+            sendTypingIndicator(channelId!);
+          }
+        }}
         onKeyDown={onPostMessage}
       />
     </div>
