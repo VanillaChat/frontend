@@ -6,7 +6,7 @@ import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
 import AppLayout from "@/components/layouts/AppLayout";
 import AppDMLayout from "@/components/layouts/AppDMLayout";
-import ChatPane, {ChatPaneStub} from "@/components/App/ChatPane";
+import ChatPane, {ChatPaneStub} from "@/components/App/panes/ChatPane";
 import MemberList from "@/components/App/servers/MemberList";
 import AppGuildLayout from "@/components/layouts/AppGuildLayout";
 import {useMessages} from "@/store/messages";

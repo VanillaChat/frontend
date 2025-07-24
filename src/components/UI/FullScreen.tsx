@@ -1,7 +1,7 @@
 import {createPortal} from "react-dom";
 import {JSX, ReactNode, useEffect, useState} from "react";
 import {AnimatePresence, motion} from "framer-motion";
-import {serverLinkStyle} from "@/components/App/ServerSidebar";
+import {serverLinkStyle} from "@/utils/serverLinkStyle";
 import {FaXmark} from "react-icons/fa6";
 import {useAppStore} from "@/store/app";
 
