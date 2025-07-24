@@ -87,7 +87,7 @@ const ChannelLink: React.FC<ChannelLinkProps> = (props: ChannelLinkProps) => {
               <div className="w-[20px] h-[20px] mr-[-5px] text-center items-center justify-center hidden group-hover:flex group-[.active]:flex">
                 <Tooltip.Root>
                   <Tooltip.Trigger className="flex size-8 cursor-pointer items-center justify-center rounded-sm text-gray-900 select-none focus-visible:bg-none focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800  focus-visible:[&:not(:hover)]:bg-transparent">
-                    <PulseLoader color={theme === 'light' ? 'black' : 'white'} size={6} />
+                    <PulseLoader color={theme === 'light' ? 'black' : 'white'} size={6} speedMultiplier={.6} />
                   </Tooltip.Trigger>
                   <Tooltip.Portal>
                     <Tooltip.Positioner sideOffset={10}>

@@ -331,7 +331,7 @@ const ChatPane: React.FC = () => {
       {
         messages.typingIndicators[channelId!]?.length > 0 &&
           <div className="mb-2 items-center gap-2 rounded-[8px] py-[4px] px-[10px] transition-all duration-[.2s] focus:border-[#dbddd0] dark:bg-[#393830] dark:border-[#464540] dark:text-white dim:bg-[#181815] dim:border-[#302F2A] dim:text-white border-[1px] border-[#D3D2C8] bg-[#fffefa] w-[98%] flex self-center">
-            <PulseLoader color={theme === 'light' ? 'black' : 'white'} size={6} />
+            <PulseLoader color={theme === 'light' ? 'black' : 'white'} size={6} speedMultiplier={.6} />
             <small className="text-[12px]">{t('app.chat.typing', {user1: messages.typingIndicators[channelId!][0]?.username, user2: messages.typingIndicators[channelId!][1]?.username, count: messages.typingIndicators[channelId!].length, remainingCount: Math.max(0, messages.typingIndicators[channelId!].length - 2)})}</small>
           </div>
       }
