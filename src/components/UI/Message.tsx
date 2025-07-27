@@ -99,7 +99,7 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 </div>
                 {
                     (!editCache.cache.isEditing || editCache.cache.messageId !== props.id) &&
-                    <div className="flex flex-row items-center justify-center gap-1">
+                    <div className="flex flex-col items-center justify-center gap-1">
                         {/*<p className={cn(*/}
                         {/*    "text-[14px] !select-text m-0 whitespace-pre-line wrap-break-word max-w-[100%] break-all dark:text-[#C2C2C2] dim:text-[#C2C2C2]",*/}
                         {/*    {*/}
@@ -107,8 +107,12 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                         {/*    }*/}
                         {/*)}>{props.content}</p>*/}
                         <Markdown
-                            children={props.content}
                             components={{
+                                strong: ({children, ...rest}) => <strong className="pointer-events-auto !select-text" {...rest}>{children}</strong>,
+                                p: ({children, ...rest}) => <p className="pointer-events-auto !select-text" {...rest}>{children}</p>,
+                                h1: ({children, ...rest}) => <h1 className="pointer-events-auto !select-text text-[32px] font-bold" {...rest}>{children}</h1>,
+                                h2: ({children, ...rest}) => <h2 className="pointer-events-auto !select-text text-[24px] font-bold" {...rest}>{children}</h2>,
+                                h3: ({children, ...rest}) => <h3 className="pointer-events-auto !select-text text-[16px] font-bold" {...rest}>{children}</h3>,
                                 code({children, className, node, ...rest}) {
                                     const match = /language-(\w+)/.exec(className || '')
                                     return match ? (
@@ -132,7 +136,9 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                                     )
                                 }
                             }}
-                        />
+                        >
+                            {props.content}
+                        </Markdown>
                         {props.updatedAt && <small className="opacity-45 text-[12px]">(edited)</small>}
                     </div>
                 }
@@ -176,6 +182,12 @@ export default function Message(props: MessageProps) {
         previous.author.id === props.author.id &&
         dayjs(previous.createdAt).diff(props.createdAt, 'minutes') < 5
     ) || false;
+
+    console.log(isCompact);
+    console.log(previous?.createdAt);
+    console.log(props.createdAt);
+    console.log(dayjs(previous?.createdAt).diff(props.createdAt, 'minutes'));
+
     const editCache = useEditCache();
     const session = useSession();
     const ref = useRef<HTMLDivElement>(null);
