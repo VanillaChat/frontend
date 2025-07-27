@@ -230,7 +230,7 @@ export default function Message(props: MessageProps) {
     const isCompact = (
         previous &&
         previous.author.id === props.author.id &&
-        dayjs(previous.createdAt).diff(props.createdAt, 'minutes') < 5
+        dayjs(props.createdAt).diff(previous.createdAt, 'minutes') < 5
     ) || false;
     
     const editCache = useEditCache();
