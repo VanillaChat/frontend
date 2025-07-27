@@ -87,9 +87,6 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 [baseMessageStyle(props, props.isCompact, editCache)]: props.isBare
             }
         )}
-        style={{
-            overflowY: props.isProfileOpen ? "scroll" : "hidden"
-        }}
         ref={props.messageRef}
         data-message-id={props.id}
     >
