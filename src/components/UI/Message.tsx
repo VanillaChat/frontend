@@ -44,7 +44,7 @@ const baseMessageStyle = (props: MessageProps, isCompact: boolean, editCache: Re
     "p-[0_16px] mt-[12px] opacity-100 flex rounded-r-[8px] text-[16px] w-[100%] justify-between hover:bg-[#d0d0d0] dark:hover:bg-[#49473f] dim:hover:bg-[#282828] group",
     {
         "opacity-[.5]": props.state === "SENDING",
-        "px-[74px] mt-1": isCompact,
+        "px-[70px] mt-1": isCompact,
         "bg-[#d0d0d0] dark:bg-[#49473f] dim:bg-[#282828] pt-2": editCache.cache.isEditing && editCache.cache.messageId === props.id,
     }
 )
