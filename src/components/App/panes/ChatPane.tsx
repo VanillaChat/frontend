@@ -201,7 +201,7 @@ const ChatPane: React.FC = () => {
         !event.ctrlKey &&
         !event.metaKey &&
         event.key !== "Shift" &&
-        !["Escape", "CapsLock", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key) &&
+        !["Escape", "CapsLock", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Meta", "Super"].includes(event.key) &&
         length === 0 &&
         !appStore.hasModal &&
         !editCache.cache.isEditing
