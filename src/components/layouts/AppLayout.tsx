@@ -1,18 +1,11 @@
 import {useGateway} from "@/store/gateway";
 import {Outlet} from "react-router-dom";
-import ReconnectingWebSocket, {CloseEvent} from "@/utils/websocket/ReconnectingWebSocket";
+import {CloseEvent} from "@/utils/websocket/ReconnectingWebSocket";
 import {useCallback, useEffect} from "react";
-import {OpCodeHandlers, Payload} from "@/utils/websocket/handlers";
-
-const ws = new ReconnectingWebSocket(import.meta.env.VITE_GATEWAY_URL!, [], {
-    maxRetries: 5,
-    maxReconnectionDelay: 5000,
-    startClosed: true
-});
+import {OpCodeHandlers, Payload, ws} from "@/utils/websocket/handlers";
 
 export default function AppLayout() {
     const gateway = useGateway();
-    // const ws = new WebSocket(`${import.meta.env.VITE_API_URL}/gateway`);
 
     const onOpen = useCallback(() => {
         console.log(`[WS] Connected.`);
@@ -52,7 +45,6 @@ export default function AppLayout() {
 
     if (!gateway.isConnected) {
         return <div className="flex justify-center items-center h-[100dvh] flex-col gap-[16px] dark:bg-[#262622] dim:bg-[#000000]" onContextMenu={(e) => e.preventDefault()}>
-            {/*<img src={logo} alt="logo" className="connecting-logo" />*/}
             <div className="px-[25px] text-[50px] text-black dark:text-white dim:text-white font-semibold rounded-[12px] font-logo animate-(--logo-animation) dark:animate-(--logo-animation-dark) dim:animate-(--logo-animation-dark)">
                 <span>V</span>
             </div>

@@ -60,6 +60,7 @@ export type MembersState = {
     data: Record<string, ServerMember[]>;
     setMembers: (serverId: string, members: ServerMember[]) => void;
     addMember: (serverId: string, member: ServerMember) => void;
+    updateMember: (serverId: string, member: ServerMember) => void;
 }
 
 export const useMembers = create<MembersState>()(devtools((set) => ({
@@ -74,6 +75,16 @@ export const useMembers = create<MembersState>()(devtools((set) => ({
             newArray[index] = member;
         } else {
             newArray.push(member);
+        }
+        return {
+            data: {...state.data, [serverId]: newArray}
+        }
+    }),
+    updateMember: (serverId: string, member: ServerMember) => set((state) => {
+        const newArray = [...(state.data[serverId] ?? [])];
+        const index = newArray.findIndex(m => m.id === member.id);
+        if (index !== -1) {
+            newArray[index] = member;
         }
         return {
             data: {...state.data, [serverId]: newArray}

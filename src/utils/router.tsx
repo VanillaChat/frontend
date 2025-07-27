@@ -23,15 +23,19 @@ export let router = createBrowserRouter([
         loader: async () => {
             const session = useSession.getState();
             if (session.currentUser) return;
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/session`, {
-               credentials: 'include'
-            });
-            if (res.status === 200) {
-                const json = await res.json();
-                session.login({
-                    currentUser: json.user,
-                    currentAccount: json.account
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/session`, {
+                   credentials: 'include'
                 });
+                if (res.status === 200) {
+                    const json = await res.json();
+                    session.login({
+                        currentUser: json.user,
+                        currentAccount: json.account
+                    });
+                }
+            } catch (e) {
+                console.error(e);
             }
         },
         children: [

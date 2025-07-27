@@ -277,7 +277,7 @@ const ChatPane: React.FC = () => {
             <MessageSkeleton />
           </>
         )}
-        {messages.data[channelId!]?.length > 0 ? (
+        {messages.data[channelId!]?.length > 0 && (
           Array.from(messages.data[channelId!])
             .map((message, index) => (
               <Message
@@ -292,8 +292,29 @@ const ChatPane: React.FC = () => {
                 id={message.id}
               />
             ))
-        ) : (
-          <div>fetching messages...</div>
+        )}
+        {(messages.data[channelId!]?.length ?? 0) === 0 && (
+            <div className="font-medium text-center flex justify-center items-center flex-col h-[100%] dark:bg-[#262622] dim:bg-[#141413] w-[100%]">
+              <svg
+                  width="36"
+                  height="36"
+                  viewBox="0 0 20 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mb-[10px]"
+              >
+                <path
+                    d="M7.5 6L12.5 11M12.5 6L7.5 11M5 16V18.3355C5 18.8684 5 19.1348 5.10923 19.2716C5.20422 19.3906 5.34827 19.4599 5.50054 19.4597C5.67563 19.4595 5.88367 19.2931 6.29976 18.9602L8.68521 17.0518C9.17252 16.662 9.41617 16.4671 9.68749 16.3285C9.9282 16.2055 10.1844 16.1156 10.4492 16.0613C10.7477 16 11.0597 16 11.6837 16H14.2C15.8802 16 16.7202 16 17.362 15.673C17.9265 15.3854 18.3854 14.9265 18.673 14.362C19 13.7202 19 12.8802 19 11.2V5.8C19 4.11984 19 3.27976 18.673 2.63803C18.3854 2.07354 17.9265 1.6146 17.362 1.32698C16.7202 1 15.8802 1 14.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V12C1 12.93 1 13.395 1.10222 13.7765C1.37962 14.8117 2.18827 15.6204 3.22354 15.8978C3.60504 16 4.07003 16 5 16Z"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+              </svg>
+
+              <h1 className="text-[2rem] font-bold">{t("app.chat.noMessages")}</h1>
+              <p className="text-[1rem]">{t("app.chat.noMessagesDescription")}</p>
+            </div>
         )}
         {messages.isLoadingNewer && (
           <>
@@ -305,29 +326,6 @@ const ChatPane: React.FC = () => {
           </>
         )}
       </ul>
-      {(messages.data[channelId!]?.length ?? 0) === 0 && (
-        <div className="font-medium text-center flex justify-center items-center flex-col h-[100%] dark:bg-[#262622] dim:bg-[#141413]">
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 20 21"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="mb-[10px]"
-          >
-            <path
-              d="M7.5 6L12.5 11M12.5 6L7.5 11M5 16V18.3355C5 18.8684 5 19.1348 5.10923 19.2716C5.20422 19.3906 5.34827 19.4599 5.50054 19.4597C5.67563 19.4595 5.88367 19.2931 6.29976 18.9602L8.68521 17.0518C9.17252 16.662 9.41617 16.4671 9.68749 16.3285C9.9282 16.2055 10.1844 16.1156 10.4492 16.0613C10.7477 16 11.0597 16 11.6837 16H14.2C15.8802 16 16.7202 16 17.362 15.673C17.9265 15.3854 18.3854 14.9265 18.673 14.362C19 13.7202 19 12.8802 19 11.2V5.8C19 4.11984 19 3.27976 18.673 2.63803C18.3854 2.07354 17.9265 1.6146 17.362 1.32698C16.7202 1 15.8802 1 14.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V12C1 12.93 1 13.395 1.10222 13.7765C1.37962 14.8117 2.18827 15.6204 3.22354 15.8978C3.60504 16 4.07003 16 5 16Z"
-              strokeWidth="2"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-
-          <h1 className="text-[2rem] font-bold">{t("app.chat.noMessages")}</h1>
-          <p className="text-[1rem]">{t("app.chat.noMessagesDescription")}</p>
-        </div>
-      )}
       {
         messages.typingIndicators[channelId!]?.length > 0 &&
           <div className="mb-2 items-center gap-2 rounded-[8px] py-[4px] px-[10px] transition-all duration-[.2s] focus:border-[#dbddd0] dark:bg-[#393830] dark:border-[#464540] dark:text-white dim:bg-[#181815] dim:border-[#302F2A] dim:text-white border-[1px] border-[#D3D2C8] bg-[#fffefa] w-[98%] flex self-center">

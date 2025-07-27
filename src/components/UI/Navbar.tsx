@@ -5,6 +5,7 @@ import Button from "@/components/UI/Button";
 import {useSession} from "@/store/session";
 import { Popover } from "@base-ui-components/react/popover";
 import cn from "@/utils/cn";
+import Avatar from "@/components/UI/Avatar";
 
 export function ArrowSvg(props: React.ComponentProps<'svg'>) {
   return (
@@ -66,13 +67,7 @@ export const Navbar = () => {
             // </Button>
                 <Popover.Root>
                   <Popover.Trigger className="flex size-10 items-center justify-center rounded-md cursor-pointer">
-                    <img
-                        width="42px"
-                        height="42px"
-                        src={`${import.meta.env.VITE_API_URL}/cdn/embed/avatars/${(BigInt(session.currentUser.id!) >> 22n) % 6n}.png`}
-                        alt="channel icon"
-                        className="rounded-full"
-                    />
+                      <Avatar width="42px" height="42px" id={session.currentUser.id} />
                   </Popover.Trigger>
                   <Popover.Portal>
                     <Popover.Positioner sideOffset={8}>

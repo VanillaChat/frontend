@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useRef} from "react";
 import {NavLink, useNavigate} from "react-router-dom";
 import Modal from "../UI/Modal";
 import {FormInput} from "../UI/Input";
@@ -11,9 +11,12 @@ import {useSession} from "@/store/session";
 import Alert from "@/components/UI/Alert";
 import Tabs from "@/components/UI/Tabs";
 import {useAppStore} from "@/store/app";
-import {AccountSettingsPane} from "@/components/App/panes/AccountSettingsPane";
 import {AdminPane} from "@/components/App/panes/AdminSettingsPane";
 import {serverLinkStyle} from "@/utils/serverLinkStyle";
+import CurrentUserProfile from "@/components/UI/extension/CurrentUserProfile";
+import {useVirtualizer} from "@tanstack/react-virtual";
+import {AccountSettingsPane} from "@/components/App/panes/AccountSettingsPane";
+import Avatar from "@/components/UI/Avatar";
 
 const ServerCreateSchema = z.object({
     name: z.string().min(2, "app.modals.serverCreate.nameMinChars").max(64, "app.modals.serverCreate.nameMaxChars"),
@@ -204,8 +207,16 @@ const ServerSidebar: React.FC = () => {
     const servers = useServers();
     const channels = useChannels();
     const session = useSession();
+    const parentRef = useRef<HTMLDivElement>(null);
+
+    const serverVirtualizer = useVirtualizer({
+        count: servers.data.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 60
+    });
+
     return (
-        <div className="flex overflow-hidden flex-col h-[100%] bg-[#e9e9e9] w-[72px] items-center pt-[15px] dark:bg-[#302F2B] dim:bg-black">
+        <div ref={parentRef} className="flex overflow-hidden flex-col h-[100%] bg-[#e9e9e9] w-[72px] items-center pt-[15px] dark:bg-[#302F2B] dim:bg-black">
             <div>
                 <NavLink
                     to="/channels/@me"
@@ -216,23 +227,31 @@ const ServerSidebar: React.FC = () => {
                 <ServerAddModal />
             </div>
             {servers.data.length > 0 && <div className="w-[35px] h-[1px] bg-black dark:bg-[#9b8f4d] dim:bg-[#9b8f4d]" />}
-            <div className="overflow-auto mt-[10px]" style={{scrollbarWidth: 'none'}}>
-                {servers.data.map((server) => (
-                    <NavLink
-                        to={`/channels/${server.id}/${channels.data[server.id]?.[0].id ?? ''}`}
-                        className={({isActive}) => serverLinkStyle({ isActive, className: 'font-semibold' })}
-                        key={server.id}
-                    >
-                        {server.name
-                            .split(" ")
-                            .map((word) => word[0])
-                            .join("")}
-                    </NavLink>
-                ))}
+            <div className="overflow-auto mt-[10px]" style={{scrollbarWidth: 'none', height: `${serverVirtualizer.getTotalSize()}px`}}>
+                {
+                    serverVirtualizer
+                        .getVirtualItems()
+                        .map((virtualItem) => {
+                            const server = servers.data[virtualItem.index];
+                            return <NavLink
+                                to={`/channels/${server.id}/${channels.data[server.id]?.[0].id ?? ''}`}
+                                className={({isActive}) => serverLinkStyle({ isActive, className: 'font-semibold' })}
+                                key={server.id}
+                            >
+                                {server.name
+                                    .split(" ")
+                                    .map((word) => word[0])
+                                    .join("")}
+                            </NavLink>;
+                        })
+                }
             </div>
-            <div className="justify-self-end mt-auto mb-5 items-center justify-center flex flex-col">
+            <div className="justify-self-end mt-auto gap-2 mb-2 items-center justify-center flex flex-col">
                 {((session.currentUser!.flags & 1 << 0) === 1 << 0) && <AdminPane />}
-                <AccountSettingsPane />
+                <CurrentUserProfile user={session.currentUser!}>
+                    <Avatar avatar={session.currentUser?.avatar} id={session.currentUser?.id!} className="cursor-pointer" width="40px" height="40px" />
+                </CurrentUserProfile>
+                <AccountSettingsPane currentTab="overview" />
             </div>
         </div>
     );

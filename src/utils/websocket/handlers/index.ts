@@ -19,3 +19,9 @@ export const OpCodeHandlers: {[key: number]: OpCodeHandler} = {
     10: hello,
     11: heartbeatAck
 }
+
+export const ws = new ReconnectingWebSocket(import.meta.env.VITE_GATEWAY_URL!, [], {
+    maxRetries: 5,
+    maxReconnectionDelay: 5000,
+    startClosed: true
+});
