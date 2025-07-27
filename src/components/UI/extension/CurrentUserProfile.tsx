@@ -66,7 +66,7 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                     <Popover.Arrow className="data-[side=bottom]:top-[-8px] data-[side=left]:right-[-13px] data-[side=left]:rotate-90 data-[side=right]:left-[-13px] data-[side=right]:-rotate-90 data-[side=top]:bottom-[-8px] data-[side=top]:rotate-180">
                         <ArrowSvg />
                     </Popover.Arrow>
-                    <div className="w-[100%] h-[500px] rounded-lg">
+                    <div className="w-[100%] h-[500px] rounded-lg p-1">
                         <div className="w-[100%] h-[130px] rounded-t-lg bg-[#363636]">
                             <div className="border-white bg-white dark:border-[#262622] dark:bg-[#262622] dim:border-black dim:bg-black border-[2px] translate-y-[80px] translate-x-[15px] w-fit rounded-[100%]">
                                 <Avatar
@@ -76,7 +76,7 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                                     avatar={props.user.avatar}
                                     className="p-0.5"
                                     style={{
-                                        border: "4px solid " + {
+                                        border: `${props.user.status === "UNAVAILABLE" ? "0" : "4"}px solid ` + {
                                             UNAVAILABLE: "transparent",
                                             ONLINE: statuses[0].color,
                                             LOOKING_TO_PLAY: statuses[3].color,
