@@ -12,7 +12,7 @@ export default defineConfig(() => {
         react(),
         viteTsconfigPaths(),
         svgrPlugin(),
-        tailwindcss()
+        tailwindcss(),
     ],
     resolve: {
       alias: {
@@ -24,7 +24,7 @@ export default defineConfig(() => {
         watch: {
             ignored: ['**/.idea/**']
         },
-          allowedHosts: ['localhost', '3813-2a02-a318-e0aa-b480-fb9-2a80-2ec9-51.ngrok-free.app']
+          allowedHosts: ['localhost', 'vanilla.local']
       }
   };
 });

@@ -14,7 +14,7 @@ export default function Avatar(props: AvatarProps) {
     return <img
         width={props.width}
         height={props.height}
-        src={`${import.meta.env.VITE_API_URL}/cdn/${props.avatar ? `/avatars/${props.id}/${props.avatar}.webp` : `/embed/avatars/${(BigInt(props.id) >> 22n) % 6n}.webp`}`}
+        src={`${import.meta.env.VITE_API_URL}/cdn/${props.avatar ? `avatars/${props.id}/${props.avatar}.webp` : `embed/avatars/${(BigInt(props.id) >> 22n) % 6n}.webp`}`}
         alt="user avatar"
         className={cn(
             "rounded-full shrink-0",
