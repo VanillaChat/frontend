@@ -18,6 +18,7 @@ import Avatar from "@/components/UI/Avatar";
 import Markdown from "react-markdown";
 import {Highlight, themes} from "prism-react-renderer";
 import {useTheme} from "@/context/ThemeProvider";
+import UserProfile from "@/components/UI/extension/UserProfile";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(isToday);
@@ -85,12 +86,30 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 data-message-id={props.id}
     >
         <div className="flex flex-row items-start gap-[8px] w-[100%]">
-            {!props.isCompact && <Avatar width="42px" height="42px" id={props.author.id!} avatar={props.author.avatar} className="mr-[8px]" />}
+            {
+                !props.isCompact &&
+                <UserProfile user={props.author as User} side="right">
+                    {
+                        () =>
+                            <Avatar width="42px" height="42px" id={props.author.id!} avatar={props.author.avatar} className="mr-[8px]" />
+                    }
+                </UserProfile>
+            }
             <div className="flex flex-col justify-center items-start max-w-[100%] w-[100%]">
                 <div>
                     {!props.isCompact &&
                         <>
-                            <span className="font-medium">{(props.author.nickname ?? props.author.username) || "Unknown User"}</span>
+                            <UserProfile user={props.author as User} side="right">
+                                {
+                                    (isActive) =>
+                                        <span className={cn(
+                                            "font-medium cursor-pointer hover:underline",
+                                            {
+                                                "underline": isActive
+                                            }
+                                        )}>{(props.author.nickname ?? props.author.username) || "Unknown User"}</span>
+                                }
+                            </UserProfile>
                             <span className="text-[12px] ml-[5px] dark:text-[#C2C2C2] dim:text-[#C2C2C2]">
                     {formatDate(props.createdAt)}
                   </span>
