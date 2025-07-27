@@ -7,6 +7,8 @@ export type  User = {
     status: 'ONLINE' | 'DND' | 'IDLE' | 'LOOKING_TO_PLAY' | 'UNAVAILABLE';
     flags: number;
     nickname?: string;
+    bio: string | null;
+    avatar?: string | null;
 };
 
 export type Account = {
