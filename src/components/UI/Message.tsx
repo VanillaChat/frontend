@@ -1,4 +1,4 @@
-import React, {useCallback, useRef} from "react";
+import React, {Dispatch, SetStateAction, useCallback, useEffect, useRef} from "react";
 import cn from "@/utils/cn";
 import {User} from "@/types/User";
 import {useEditCache, useMessages} from "@/store/messages";
@@ -19,6 +19,7 @@ import Markdown from "react-markdown";
 import {Highlight, themes} from "prism-react-renderer";
 import {useTheme} from "@/context/ThemeProvider";
 import UserProfile from "@/components/UI/extension/UserProfile";
+import {usePresence} from "@/store/presence";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(isToday);
@@ -35,6 +36,8 @@ type MessageProps = {
     channelId: string;
     index: number;
     id: string;
+    isProfileOpen: boolean;
+    setIsProfileOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 const baseMessageStyle = (props: MessageProps, isCompact: boolean, editCache: ReturnType<typeof useEditCache.getState>) => cn(
@@ -51,6 +54,7 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
     const messages = useMessages();
     const { channelId } = useParams();
     const { theme } = useTheme();
+    const isOnline = usePresence(state => state.isOnline);
 
     const onUpdateMessage = useCallback(async (event: React.KeyboardEvent) => {
         if (event.key === "Enter" && !event.shiftKey && !event.repeat) {
@@ -76,22 +80,44 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
         }
     }, [editCache.cache]);
 
-    return <div className={cn(
-        "w-[100%]",
-        {
-            [baseMessageStyle(props, props.isCompact, editCache)]: props.isBare
-        }
-    )}
-                ref={props.messageRef}
-                data-message-id={props.id}
+    return <div
+        className={cn(
+            "w-[100%]",
+            {
+                [baseMessageStyle(props, props.isCompact, editCache)]: props.isBare
+            }
+        )}
+        style={{
+            overflowY: props.isProfileOpen ? "scroll" : "hidden"
+        }}
+        ref={props.messageRef}
+        data-message-id={props.id}
     >
         <div className="flex flex-row items-start gap-[8px] w-[100%]">
             {
                 !props.isCompact &&
-                <UserProfile user={props.author as User} side="right">
+                <UserProfile user={{
+                    ...props.author as User,
+                    status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
+                }} side="right">
                     {
-                        () =>
-                            <Avatar width="42px" height="42px" id={props.author.id!} avatar={props.author.avatar} className="mr-[8px]" />
+                        (isActive) => {
+                            useEffect(() => {
+                                props.setIsProfileOpen(isActive);
+                            }, [isActive]);
+                            return <Avatar
+                                width="42px"
+                                height="42px"
+                                id={props.author.id!}
+                                avatar={props.author.avatar}
+                                className={cn(
+                                    "mr-[8px]",
+                                    {
+                                        "[data-parent]:overflow-hidden": isActive
+                                    }
+                                )}
+                            />
+                        }
                     }
                 </UserProfile>
             }
@@ -99,15 +125,22 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 <div>
                     {!props.isCompact &&
                         <>
-                            <UserProfile user={props.author as User} side="right">
+                            <UserProfile user={{
+                                ...props.author as User,
+                                status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
+                            }} side="right">
                                 {
-                                    (isActive) =>
-                                        <span className={cn(
+                                    (isActive) => {
+                                        useEffect(() => {
+                                            props.setIsProfileOpen(isActive);
+                                        }, [isActive]);
+                                        return <span className={cn(
                                             "font-medium cursor-pointer hover:underline",
                                             {
                                                 "underline": isActive
                                             }
                                         )}>{(props.author.nickname ?? props.author.username) || "Unknown User"}</span>
+                                    }
                                 }
                             </UserProfile>
                             <span className="text-[12px] ml-[5px] dark:text-[#C2C2C2] dim:text-[#C2C2C2]">
@@ -132,6 +165,7 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                                 h1: ({children, ...rest}) => <h1 className="pointer-events-auto !select-text text-[32px] font-bold" {...rest}>{children}</h1>,
                                 h2: ({children, ...rest}) => <h2 className="pointer-events-auto !select-text text-[24px] font-bold" {...rest}>{children}</h2>,
                                 h3: ({children, ...rest}) => <h3 className="pointer-events-auto !select-text text-[16px] font-bold" {...rest}>{children}</h3>,
+                                li: ({children, ...rest}) => <li className="pointer-events-auto !select-text [ul>li]:!list-disc [ol>li]:!list-decimal" {...rest}>{children}</li>,
                                 code({children, className, node, ...rest}) {
                                     const match = /language-(\w+)/.exec(className || '')
                                     return match ? (

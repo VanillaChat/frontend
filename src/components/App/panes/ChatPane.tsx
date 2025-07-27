@@ -49,9 +49,9 @@ const ChatPane: React.FC = () => {
   const isInitialLoad = useRef(true);
   const isViewingOlderMessages = useRef(false);
   const { theme } = useTheme();
-  
   const lastTypingTimeRef = useRef<{ [channelId: string]: number }>({});
-  
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
   const sendTypingIndicator = useCallback(throttle(async (channelId: string) => {
     const now = Date.now();
     const lastTime = lastTypingTimeRef.current[channelId] || 0;
@@ -267,7 +267,13 @@ const ChatPane: React.FC = () => {
         <h1 className="text-[24px] font-normal m-0">{isDM ? "@" : "#"}</h1>
         <p className="text-[16px] font-medium">{isDM ? "John Doe" : channel?.name}</p>
       </div>
-      <ul className="max-w-[100%] h-[88vh] pl-0 p-[10px] m-0 flex flex-col justify-start items-start overflow-auto min-w-0 dark:bg-[#262622] dim:bg-[#141413]" ref={msgRef}>
+      <ul
+          className="max-w-[100%] h-[88vh] pl-0 p-[10px] m-0 flex flex-col justify-start items-start min-w-0 dark:bg-[#262622] dim:bg-[#141413]"
+          style={{
+            overflow: isProfileOpen ? "hidden" : "auto"
+          }}
+          ref={msgRef}
+      >
         {messages.isLoadingMore && (
           <>
             <MessageSkeleton />
@@ -290,6 +296,8 @@ const ChatPane: React.FC = () => {
                 key={index}
                 index={index}
                 id={message.id}
+                isProfileOpen={isProfileOpen}
+                setIsProfileOpen={setIsProfileOpen}
               />
             ))
         )}
