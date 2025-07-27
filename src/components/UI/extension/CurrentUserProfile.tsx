@@ -11,6 +11,7 @@ import {ws} from "@/utils/websocket/handlers";
 import {usePresence, UserStatus} from "@/store/presence";
 import {useSession} from "@/store/session";
 import {useMembers} from "@/store/servers";
+import logo from "@/icons/squarelogo.png";
 
 export type UserProfileSmallProps = {
     children: ReactNode;
@@ -96,7 +97,7 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                                 <h1 className="font-semibold text-[14px]">Joined At</h1>
                                 <p className="flex flex-row gap-2 font-semibold items-center">
                                     <img
-                                        src="/src/icons/squarelogo.png"
+                                        src={logo}
                                         className="w-[24px] h-[24px] rounded-[8px]"
                                         alt="logo"
                                     />
@@ -139,7 +140,12 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                                         });
                                     });
                                 }}>
-                                    <Select.Trigger className="flex h-10 min-w-36 items-center justify-between gap-3 rounded-md border border-gray-200 pr-3 pl-3.5 text-base text-gray-900 select-none hover:bg-gray-100 focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100 data-[popup-open]:bg-gray-100">
+                                    <Select.Trigger className={cn(
+                                        "flex h-10 min-w-36 items-center justify-between gap-3 rounded-md border pr-3 pl-3.5 text-base select-none",
+                                        "border-gray-200  hover:bg-gray-100 focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100 data-[popup-open]:bg-gray-100  text-gray-900",
+                                        "dark:border-[#545353] dark:hover:bg-[#545353] dark:data-[popup-open]:bg-[#545353] dark:active:bg-[#545353] dark:text-white",
+                                        "dim:border-[#2A2A2A] dim:hover:bg-[#2A2A2A] dim:data-[popup-open]:bg-[#2A2A2A] dim:active:bg-[#2A2A2A]  dim:text-white"
+                                    )}>
 
                                         <div className="flex items-center gap-2">
                                             <div
@@ -157,12 +163,17 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                                     <Select.Portal>
                                         <Select.Positioner className="outline-none" sideOffset={8}>
                                             <Select.ScrollUpArrow className="top-0 z-[1] flex h-4 w-full cursor-default items-center justify-center rounded-md bg-[canvas] text-center text-xs before:absolute before:top-[-100%] before:left-0 before:h-full before:w-full before:content-[''] data-[direction=down]:bottom-0 data-[direction=down]:before:bottom-[-100%]" />
-                                            <Select.Popup className="group max-h-[var(--available-height)] origin-[var(--transform-origin)] overflow-y-auto rounded-md bg-[canvas] py-1 text-gray-900 shadow-lg shadow-gray-200 outline-1 outline-gray-200 transition-[transform,scale,opacity] data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[ending-style]:transition-none data-[starting-style]:scale-90 data-[starting-style]:opacity-0 data-[side=none]:data-[starting-style]:scale-100 data-[side=none]:data-[starting-style]:opacity-100 data-[side=none]:data-[starting-style]:transition-none dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300">
+                                            <Select.Popup className={cn(
+                                                "group max-h-[var(--available-height)] origin-[var(--transform-origin)] overflow-y-auto rounded-md bg-[canvas] py-1 outline-1 transition-[transform,scale,opacity] data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[ending-style]:transition-none data-[starting-style]:scale-90 data-[starting-style]:opacity-0 data-[side=none]:data-[starting-style]:scale-100 data-[side=none]:data-[starting-style]:opacity-100 data-[side=none]:data-[starting-style]:transition-none",
+                                                "text-gray-900 shadow-lg shadow-gray-200 outline-gray-200",
+                                                "dark:outline-[#545353] dark:shadow-none dark:-outline-offset-1 dark:bg-[#262622] dark:text-white",
+                                                "dim:outline-[#2A2A2A] dim:shadow-none dim:-outline-offset-1 dim:bg-[#000000]  dim:text-white"
+                                            )}>
                                                 {statuses.map(({ label, value, color }) => (
                                                     <Select.Item
                                                         key={label}
                                                         value={value}
-                                                        className="min-w-[var(--anchor-width)] cursor-default items-center flex flex-row justify-between gap-2 py-2 px-4 text-sm leading-4 outline-none select-none group-data-[side=none]:min-w-[calc(var(--anchor-width)+1rem)] group-data-[side=none]:pr-12 group-data-[side=none]:text-base group-data-[side=none]:leading-4 data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-[#f7e26b]"
+                                                        className="min-w-[var(--anchor-width)] cursor-default items-center flex flex-row justify-between gap-2 py-2 px-4 text-sm leading-4 outline-none select-none group-data-[side=none]:min-w-[calc(var(--anchor-width)+1rem)] group-data-[side=none]:pr-12 group-data-[side=none]:text-base group-data-[side=none]:leading-4 data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-[#f7e26b] data-[highlighted]:text-black"
                                                     >
                                                         <Select.ItemText className="flex flex-row items-center gap-2">
                                                             <div
@@ -173,7 +184,7 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                                                             />
                                                             {label}
                                                         </Select.ItemText>
-                                                        <Select.ItemIndicator className="">
+                                                        <Select.ItemIndicator>
                                                             <CheckIcon className="size-3" />
                                                         </Select.ItemIndicator>
                                                     </Select.Item>
