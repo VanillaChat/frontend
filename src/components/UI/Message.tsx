@@ -14,6 +14,10 @@ import {useSession} from "@/store/session";
 import Input from "@/components/UI/Input";
 import {formatDate} from "@/utils/formatDate";
 import {useParams} from "react-router-dom";
+import Avatar from "@/components/UI/Avatar";
+import Markdown from "react-markdown";
+import {Highlight, themes} from "prism-react-renderer";
+import {useTheme} from "@/context/ThemeProvider";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(isToday);
@@ -22,14 +26,14 @@ dayjs.extend(isYesterday);
 dayjs.extend(utc);
 
 type MessageProps = {
-  content: string;
-  author: Partial<User>;
-  createdAt: Date;
-  state: 'SENT' | 'SENDING' | 'FAILED';
-  updatedAt: Date | null;
-  channelId: string;
-  index: number;
-  id: string;
+    content: string;
+    author: Partial<User>;
+    createdAt: Date;
+    state: 'SENT' | 'SENDING' | 'FAILED';
+    updatedAt: Date | null;
+    channelId: string;
+    index: number;
+    id: string;
 };
 
 const baseMessageStyle = (props: MessageProps, isCompact: boolean, editCache: ReturnType<typeof useEditCache.getState>) => cn(
@@ -45,6 +49,7 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
     const editCache = useEditCache();
     const messages = useMessages();
     const { channelId } = useParams();
+    const { theme } = useTheme();
 
     const onUpdateMessage = useCallback(async (event: React.KeyboardEvent) => {
         if (event.key === "Enter" && !event.shiftKey && !event.repeat) {
@@ -76,17 +81,11 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
             [baseMessageStyle(props, props.isCompact, editCache)]: props.isBare
         }
     )}
-               ref={props.messageRef}
+                ref={props.messageRef}
                 data-message-id={props.id}
     >
         <div className="flex flex-row items-start gap-[8px] w-[100%]">
-            {!props.isCompact && <img
-                width="42px"
-                height="42px"
-                src={`${import.meta.env.VITE_API_URL}/cdn/embed/avatars/${(BigInt(props.author.id!) >> 22n) % 6n}.png`}
-                alt="channel icon"
-                className="mr-[8px] rounded-full shrink-0"
-            />}
+            {!props.isCompact && <Avatar width="42px" height="42px" id={props.author.id!} avatar={props.author.avatar} className="mr-[8px]" />}
             <div className="flex flex-col justify-center items-start max-w-[100%] w-[100%]">
                 <div>
                     {!props.isCompact &&
@@ -101,12 +100,39 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 {
                     (!editCache.cache.isEditing || editCache.cache.messageId !== props.id) &&
                     <div className="flex flex-row items-center justify-center gap-1">
-                        <p className={cn(
-                            "text-[14px] !select-text m-0 whitespace-pre-line wrap-break-word max-w-[100%] break-all dark:text-[#C2C2C2] dim:text-[#C2C2C2]",
-                            {
-                                "text-[#EF4444] dark:text-[#EF4444] dim:text-[#EF4444]": props.state === "FAILED"
-                            }
-                        )}>{props.content}</p>
+                        {/*<p className={cn(*/}
+                        {/*    "text-[14px] !select-text m-0 whitespace-pre-line wrap-break-word max-w-[100%] break-all dark:text-[#C2C2C2] dim:text-[#C2C2C2]",*/}
+                        {/*    {*/}
+                        {/*        "text-[#EF4444] dark:text-[#EF4444] dim:text-[#EF4444]": props.state === "FAILED"*/}
+                        {/*    }*/}
+                        {/*)}>{props.content}</p>*/}
+                        <Markdown
+                            children={props.content}
+                            components={{
+                                code({children, className, node, ...rest}) {
+                                    const match = /language-(\w+)/.exec(className || '')
+                                    return match ? (
+                                        <Highlight language={match[1]} code={children!.toString()} theme={theme === "light" ? themes.oneLight : themes.oneDark}>
+                                            {({ style, tokens, getLineProps, getTokenProps }) => (
+                                                <pre className="border-[#f2f2f2] rounded-[10px] p-2" style={{...style, userSelect: 'text', pointerEvents: 'all'}}>
+                                                    {tokens.map((line, i) => {
+                                                        if (i + 1 !== tokens.length) return <div key={i} style={{userSelect: 'text', pointerEvents: 'all'}} {...getLineProps({ line })}>
+                                                            {line.map((token, key) => (
+                                                                <span key={key} {...getTokenProps({ token })} style={{userSelect: 'text', pointerEvents: 'all', ...getTokenProps({token}).style}} />
+                                                            ))}
+                                                        </div>
+                                                    })}
+                                                </pre>
+                                            )}
+                                        </Highlight>
+                                    ) : (
+                                        <code {...rest} className={className}>
+                                            {children}
+                                        </code>
+                                    )
+                                }
+                            }}
+                        />
                         {props.updatedAt && <small className="opacity-45 text-[12px]">(edited)</small>}
                     </div>
                 }
@@ -154,62 +180,62 @@ export default function Message(props: MessageProps) {
     const session = useSession();
     const ref = useRef<HTMLDivElement>(null);
 
-  return (props.state !== "SENT" || editCache.cache.isEditing && editCache.cache.messageId === props.id) ?
-      <BaseMessage {...props} isCompact={isCompact} isBare messageRef={ref} />
-    : <ContextMenu.Root>
-        <ContextMenu.Trigger className={baseMessageStyle(props, isCompact, editCache)}>
-            <BaseMessage {...props} isCompact={isCompact} messageRef={ref} />
-        </ContextMenu.Trigger>
-        <ContextMenu.Portal>
-            <ContextMenu.Positioner className="outline-none">
-                <ContextMenu.Popup className={cn(
-                    "origin-[var(--transform-origin)] rounded-md bg-[canvas] py-1 text-gray-900 shadow-lg shadow-gray-200 outline-1 outline-gray-200 transition-[opacity] data-[ending-style]:opacity-0 dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300 dim:shadow-none dim:-outline-offset-1 dim:outline-gray-300",
-                    "dim:bg-black dark:bg-[#2C2B27] dark:text-white dim:text-white dark:shadow-none dark:-outline-offset-1 dark:outline-[#333333] dim:shadow-none dim:-outline-offset-1 dim:outline-[#2E2E2E]"
-                )}>
-                    <ContextMenu.Item
-                        className="flex cursor-pointer py-2 pr-8 pl-4 text-sm leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-gray-900 dim:data-[highlighted]:before:bg-[#2E2E2E] dark:data-[highlighted]:before:bg-[#454545]"
-                        onClick={async () => {
-                            await navigator.clipboard.writeText(props.content);
-                            navigator.vibrate([100, 50, 100]);
-                        }}
-                    >
-                        Copy Message
-                    </ContextMenu.Item>
-                    {session.currentUser?.id === props.author.id && (
-                        <>
-                            <ContextMenu.Item
-                                onClick={() => {
-                                    editCache.set({
-                                        isEditing: true,
-                                        messageId: props.id,
-                                        content: props.content
-                                    });
-                                    ref.current?.scrollIntoView({
-                                        behavior: "smooth",
-                                        block: "nearest",
-                                        inline: "nearest"
-                                    });
-                                }}
-                                className="flex cursor-pointer py-2 pr-8 pl-4 text-sm leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-gray-900 dim:data-[highlighted]:before:bg-[#2E2E2E] dark:data-[highlighted]:before:bg-[#454545]"
-                            >
-                                Edit
-                            </ContextMenu.Item>
-                            <ContextMenu.Separator className="mx-4 my-1.5 h-px bg-gray-200 dim:bg-[#2E2E2E] dark:bg-[#2E2E2E]" />
-                            <ContextMenu.Item
-                                onClick={async () => {
-                                    await fetch(`${import.meta.env.VITE_API_URL}/channels/${props.channelId}/messages/${props.id}`, {
-                                        method: 'DELETE',
-                                        credentials: 'include',
-                                    });
-                                }}
-                                className="flex text-[#ff0000] cursor-pointer py-2 pr-8 pl-4 text-sm leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-white data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-[#ff0000]"
-                            >
-                                Delete
-                            </ContextMenu.Item>
-                        </>
-                    )}
-                </ContextMenu.Popup>
-            </ContextMenu.Positioner>
-        </ContextMenu.Portal>
-    </ContextMenu.Root>
+    return (props.state !== "SENT" || editCache.cache.isEditing && editCache.cache.messageId === props.id) ?
+        <BaseMessage {...props} isCompact={isCompact} isBare messageRef={ref} />
+        : <ContextMenu.Root>
+            <ContextMenu.Trigger className={baseMessageStyle(props, isCompact, editCache)}>
+                <BaseMessage {...props} isCompact={isCompact} messageRef={ref} />
+            </ContextMenu.Trigger>
+            <ContextMenu.Portal>
+                <ContextMenu.Positioner className="outline-none">
+                    <ContextMenu.Popup className={cn(
+                        "origin-[var(--transform-origin)] rounded-md bg-[canvas] py-1 text-gray-900 shadow-lg shadow-gray-200 outline-1 outline-gray-200 transition-[opacity] data-[ending-style]:opacity-0 dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300 dim:shadow-none dim:-outline-offset-1 dim:outline-gray-300",
+                        "dim:bg-black dark:bg-[#2C2B27] dark:text-white dim:text-white dark:shadow-none dark:-outline-offset-1 dark:outline-[#333333] dim:shadow-none dim:-outline-offset-1 dim:outline-[#2E2E2E]"
+                    )}>
+                        <ContextMenu.Item
+                            className="flex cursor-pointer py-2 pr-8 pl-4 text-sm leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-gray-900 dim:data-[highlighted]:before:bg-[#2E2E2E] dark:data-[highlighted]:before:bg-[#454545]"
+                            onClick={async () => {
+                                await navigator.clipboard.writeText(props.content);
+                                navigator.vibrate([100, 50, 100]);
+                            }}
+                        >
+                            Copy Message
+                        </ContextMenu.Item>
+                        {session.currentUser?.id === props.author.id && (
+                            <>
+                                <ContextMenu.Item
+                                    onClick={() => {
+                                        editCache.set({
+                                            isEditing: true,
+                                            messageId: props.id,
+                                            content: props.content
+                                        });
+                                        ref.current?.scrollIntoView({
+                                            behavior: "smooth",
+                                            block: "nearest",
+                                            inline: "nearest"
+                                        });
+                                    }}
+                                    className="flex cursor-pointer py-2 pr-8 pl-4 text-sm leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-gray-900 dim:data-[highlighted]:before:bg-[#2E2E2E] dark:data-[highlighted]:before:bg-[#454545]"
+                                >
+                                    Edit
+                                </ContextMenu.Item>
+                                <ContextMenu.Separator className="mx-4 my-1.5 h-px bg-gray-200 dim:bg-[#2E2E2E] dark:bg-[#2E2E2E]" />
+                                <ContextMenu.Item
+                                    onClick={async () => {
+                                        await fetch(`${import.meta.env.VITE_API_URL}/channels/${props.channelId}/messages/${props.id}`, {
+                                            method: 'DELETE',
+                                            credentials: 'include',
+                                        });
+                                    }}
+                                    className="flex text-[#ff0000] cursor-pointer py-2 pr-8 pl-4 text-sm leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-white data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-[#ff0000]"
+                                >
+                                    Delete
+                                </ContextMenu.Item>
+                            </>
+                        )}
+                    </ContextMenu.Popup>
+                </ContextMenu.Positioner>
+            </ContextMenu.Portal>
+        </ContextMenu.Root>
 }
