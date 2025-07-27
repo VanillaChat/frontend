@@ -99,7 +99,7 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 </div>
                 {
                     (!editCache.cache.isEditing || editCache.cache.messageId !== props.id) &&
-                    <div className="flex flex-col items-center justify-center gap-1">
+                    <div className="flex flex-col justify-center gap-1">
                         {/*<p className={cn(*/}
                         {/*    "text-[14px] !select-text m-0 whitespace-pre-line wrap-break-word max-w-[100%] break-all dark:text-[#C2C2C2] dim:text-[#C2C2C2]",*/}
                         {/*    {*/}
@@ -180,14 +180,9 @@ export default function Message(props: MessageProps) {
     const isCompact = (
         previous &&
         previous.author.id === props.author.id &&
-        dayjs(props.createdAt).diff(previous.createdAt, 'minutes') < 5
+        dayjs(previous.createdAt).diff(props.createdAt, 'minutes') < 5
     ) || false;
-
-    console.log(isCompact);
-    console.log(previous?.createdAt);
-    console.log(props.createdAt);
-    console.log(dayjs(previous?.createdAt).diff(props.createdAt, 'minutes'));
-
+    
     const editCache = useEditCache();
     const session = useSession();
     const ref = useRef<HTMLDivElement>(null);
