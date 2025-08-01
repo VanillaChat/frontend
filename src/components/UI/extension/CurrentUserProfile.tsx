@@ -129,15 +129,16 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                                         status: value as UserStatus
                                     });
                                     Object.entries(members.data).forEach(([guildId, guildMembers]) => {
-                                        guildMembers.forEach(member => {
+                                        const currentUserMember = guildMembers.find(member => member.user.id === props.user.id);
+                                        if (currentUserMember) {
                                             members.updateMember(guildId, {
-                                               ...member,
+                                               ...currentUserMember,
                                                user: {
-                                                   ...member.user,
+                                                   ...currentUserMember.user,
                                                    status: value as UserStatus
                                                }
                                             });
-                                        });
+                                        }
                                     });
                                 }}>
                                     <Select.Trigger className={cn(

@@ -1,9 +1,9 @@
-import ReconnectingWebSocket from "@/utils/websocket/ReconnectingWebSocket";
 import {Payload} from "@/utils/websocket/handlers";
 import {useSession} from "@/store/session";
 import {usePresence} from "@/store/presence";
+import ReconnectingWebSocket from "@/utils/websocket/ReconnectingWebSocket";
 
-export default function presenceUpdate(ws: ReconnectingWebSocket, data: Payload) {
+export default function presenceUpdate(_: ReconnectingWebSocket, data: Payload) {
     const session = useSession.getState();
     const presence = usePresence.getState();
 
