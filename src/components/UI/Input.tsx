@@ -59,16 +59,31 @@ const Input: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
                     </label>
                 )}
                 <textarea
-                    className={inputStyles(props.className)}
+                    className={cn(inputStyles(props.className), "resize-none overflow-hidden min-h-[2em]")}
                     value={props.value}
-                    onChange={props.onChange}
+                    onChange={(e) => {
+                        if (props.onChange) props.onChange(e);
+                        // Auto-adjust height
+                        const textarea = e.target;
+                        textarea.style.height = 'auto';
+                        textarea.style.height = `${textarea.scrollHeight}px`;
+                    }}
                     placeholder={props.placeholder}
                     style={props.style}
-                    ref={props.innerRef as React.RefObject<HTMLTextAreaElement>}
+                    ref={(ref) => {
+                        if (ref && props.innerRef && 'current' in props.innerRef) {
+                            props.innerRef.current = ref;
+                            setTimeout(() => {
+                                ref.style.height = 'auto';
+                                ref.style.height = `${ref.scrollHeight}px`;
+                            }, 0);
+                        }
+                    }}
                     id={props.id}
                     name={props.name}
                     onKeyDown={props.onKeyDown}
                     autoFocus={props.autoFocus}
+                    rows={1}
                 />
             </div>
         )

@@ -268,7 +268,7 @@ const ChatPane: React.FC = () => {
         <p className="text-[16px] font-medium">{isDM ? "John Doe" : channel?.name}</p>
       </div>
       <ul
-          className="max-w-[100%] h-[88vh] pl-0 p-[10px] m-0 flex flex-col justify-start items-start min-w-0 dark:bg-[#262622] dim:bg-[#141413]"
+          className="max-w-[100%] h-[88vh] pl-0 p-[10px] m-0 flex flex-col justify-start items-start min-w-0 dark:bg-[#262622] dim:bg-[#141413] list-none"
           style={{
             overflow: isProfileOpen ? "hidden" : "auto"
           }}
@@ -362,7 +362,7 @@ const ChatPane: React.FC = () => {
       }
       <Input
         placeholder={`Message #${channel?.name}`}
-        containerClass="flex mb-[10px] w-[98%] h-[45px] text-center justify-self-center self-center mt-auto [&>input]:resize-none [&>input]>:shadow-none"
+        containerClass="flex mb-[10px] w-[98%] text-center justify-self-center self-center mt-auto mb-6 [&>input]>:shadow-none z-[999]"
         className="resize-none shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
         textarea
         innerRef={inputRef}

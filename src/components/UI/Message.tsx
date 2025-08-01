@@ -1,4 +1,4 @@
-import React, {Dispatch, SetStateAction, useCallback, useEffect, useRef} from "react";
+import React, {Dispatch, Fragment, SetStateAction, useCallback, useEffect, useRef} from "react";
 import cn from "@/utils/cn";
 import {User} from "@/types/User";
 import {useEditCache, useMessages} from "@/store/messages";
@@ -15,17 +15,16 @@ import Input from "@/components/UI/Input";
 import {formatDate} from "@/utils/formatDate";
 import {useParams} from "react-router-dom";
 import Avatar from "@/components/UI/Avatar";
-import Markdown from "react-markdown";
-import {Highlight, themes} from "prism-react-renderer";
-import {useTheme} from "@/context/ThemeProvider";
 import UserProfile from "@/components/UI/extension/UserProfile";
 import {usePresence} from "@/store/presence";
+import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(isToday);
 dayjs.extend(isTomorrow);
 dayjs.extend(isYesterday);
 dayjs.extend(utc);
+
 
 type MessageProps = {
     content: string;
@@ -44,17 +43,18 @@ const baseMessageStyle = (props: MessageProps, isCompact: boolean, editCache: Re
     "p-[0_16px] mt-[12px] opacity-100 flex rounded-r-[8px] text-[16px] w-[100%] justify-between hover:bg-[#d0d0d0] dark:hover:bg-[#49473f] dim:hover:bg-[#282828] group",
     {
         "opacity-[.5]": props.state === "SENDING",
-        "px-[70px] mt-1": isCompact,
+        "mt-1": isCompact,
         "bg-[#d0d0d0] dark:bg-[#49473f] dim:bg-[#282828] pt-2": editCache.cache.isEditing && editCache.cache.messageId === props.id,
     }
 )
 
-function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolean; messageRef?: React.RefObject<HTMLDivElement | null>; }) {
+
+function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolean; messageRef?: React.RefObject<HTMLDivElement | null> | React.RefObject<HTMLLIElement | null>; }) {
     const editCache = useEditCache();
     const messages = useMessages();
     const { channelId } = useParams();
-    const { theme } = useTheme();
     const isOnline = usePresence(state => state.isOnline);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const onUpdateMessage = useCallback(async (event: React.KeyboardEvent) => {
         if (event.key === "Enter" && !event.shiftKey && !event.repeat) {
@@ -80,48 +80,56 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
         }
     }, [editCache.cache]);
 
-    return <div
+    const Element: React.ElementType = props.isBare ? "li" : "div";
+
+    return <Element
         className={cn(
             "w-[100%]",
             {
                 [baseMessageStyle(props, props.isCompact, editCache)]: props.isBare
             }
         )}
+        // @ts-expect-error
         ref={props.messageRef}
         data-message-id={props.id}
     >
-        <div className="flex flex-row items-start gap-[8px] w-[100%]">
-            {
-                !props.isCompact &&
-                <UserProfile user={{
-                    ...props.author as User,
-                    status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
-                }} side="right">
-                    {
-                        (isActive) => {
-                            useEffect(() => {
-                                props.setIsProfileOpen(isActive);
-                            }, [isActive]);
-                            return <Avatar
-                                width="42px"
-                                height="42px"
-                                id={props.author.id!}
-                                avatar={props.author.avatar}
-                                className={cn(
-                                    "mr-[8px]",
-                                    {
-                                        "[data-parent]:overflow-hidden": isActive
-                                    }
-                                )}
-                            />
+        <div className="grid grid-cols-[42px_1fr] items-start gap-[8px] w-[100%]">
+            <div className="flex justify-start items-start">
+                {!props.isCompact ? (
+                    <UserProfile user={{
+                        ...props.author as User,
+                        status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
+                    }} side="right">
+                        {
+                            (isActive) => {
+                                useEffect(() => {
+                                    props.setIsProfileOpen(isActive);
+                                }, [isActive]);
+                                return <Avatar
+                                    width="42px"
+                                    height="auto"
+                                    id={props.author.id!}
+                                    avatar={props.author.avatar}
+                                    className={cn(
+                                        "mr-[8px] mt-0.5",
+                                        {
+                                            "[data-parent]:overflow-hidden": isActive
+                                        }
+                                    )}
+                                />
+                            }
                         }
-                    }
-                </UserProfile>
-            }
-            <div className="flex flex-col justify-center items-start max-w-[100%] w-[100%]">
-                <div>
+                    </UserProfile>
+                ) : (
+                    // Empty placeholder for compact messages to maintain alignment
+                    <div className="w-[42px] h-auto min-h-[1em] opacity-0"></div>
+                )}
+            </div>
+            
+            {/* Content column */}
+            <div className="flex flex-col justify-start items-start max-w-[100%] w-[100%]">
                     {!props.isCompact &&
-                        <>
+                        <div>
                             <UserProfile user={{
                                 ...props.author as User,
                                 status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
@@ -143,52 +151,14 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                             <span className="text-[12px] ml-[5px] dark:text-[#C2C2C2] dim:text-[#C2C2C2]">
                     {formatDate(props.createdAt)}
                   </span>
-                        </>
+                        </div>
                     }
-                </div>
                 {
                     (!editCache.cache.isEditing || editCache.cache.messageId !== props.id) &&
-                    <div className="flex flex-col justify-center gap-1">
-                        {/*<p className={cn(*/}
-                        {/*    "text-[14px] !select-text m-0 whitespace-pre-line wrap-break-word max-w-[100%] break-all dark:text-[#C2C2C2] dim:text-[#C2C2C2]",*/}
-                        {/*    {*/}
-                        {/*        "text-[#EF4444] dark:text-[#EF4444] dim:text-[#EF4444]": props.state === "FAILED"*/}
-                        {/*    }*/}
-                        {/*)}>{props.content}</p>*/}
-                        <Markdown
-                            components={{
-                                strong: ({children, ...rest}) => <strong className="pointer-events-auto !select-text" {...rest}>{children}</strong>,
-                                p: ({children, ...rest}) => <p className="pointer-events-auto !select-text" {...rest}>{children}</p>,
-                                h1: ({children, ...rest}) => <h1 className="pointer-events-auto !select-text text-[32px] font-bold" {...rest}>{children}</h1>,
-                                h2: ({children, ...rest}) => <h2 className="pointer-events-auto !select-text text-[24px] font-bold" {...rest}>{children}</h2>,
-                                h3: ({children, ...rest}) => <h3 className="pointer-events-auto !select-text text-[16px] font-bold" {...rest}>{children}</h3>,
-                                li: ({children, ...rest}) => <li className="pointer-events-auto !select-text [ul>li]:!list-disc [ol>li]:!list-decimal" {...rest}>{children}</li>,
-                                code({children, className, node, ...rest}) {
-                                    const match = /language-(\w+)/.exec(className || '')
-                                    return match ? (
-                                        <Highlight language={match[1]} code={children!.toString()} theme={theme === "light" ? themes.oneLight : themes.oneDark}>
-                                            {({ style, tokens, getLineProps, getTokenProps }) => (
-                                                <pre className="border-[#f2f2f2] rounded-[10px] p-2" style={{...style, userSelect: 'text', pointerEvents: 'all'}}>
-                                                    {tokens.map((line, i) => {
-                                                        if (i + 1 !== tokens.length) return <div key={i} style={{userSelect: 'text', pointerEvents: 'all'}} {...getLineProps({ line })}>
-                                                            {line.map((token, key) => (
-                                                                <span key={key} {...getTokenProps({ token })} style={{userSelect: 'text', pointerEvents: 'all', ...getTokenProps({token}).style}} />
-                                                            ))}
-                                                        </div>
-                                                    })}
-                                                </pre>
-                                            )}
-                                        </Highlight>
-                                    ) : (
-                                        <code {...rest} className={className}>
-                                            {children}
-                                        </code>
-                                    )
-                                }
-                            }}
-                        >
+                    <div className="flex flex-col gap-1">
+                        <MarkdownRenderer>
                             {props.content}
-                        </Markdown>
+                        </MarkdownRenderer>
                         {props.updatedAt && <small className="opacity-45 text-[12px]">(edited)</small>}
                     </div>
                 }
@@ -197,13 +167,14 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                     editCache.cache.messageId === props.id &&
                     <div className="w-[100%] flex flex-col gap-1">
                         <Input
-                            containerClass="flex mb-[10px] w-[98%] h-[45px] text-center justify-self-center self-center mt-auto [&>input]:resize-none [&>input>:shadow-none"
-                            className="resize-none shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
+                            containerClass="flex mb-[10px] w-[98%] text-center justify-self-center self-center mt-auto"
+                            className="shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
                             textarea
                             id="text-input"
                             value={editCache.cache.content || ''}
                             onChange={(e) => editCache.setContent(e.target.value)}
                             onKeyDown={onUpdateMessage}
+                            innerRef={textareaRef}
                         />
                         <small className="font-semibold flex flex-row">
                             escape to&nbsp;<p className="cursor-pointer" onClick={() => editCache.clear()}>cancel</p>, enter to save
@@ -221,7 +192,7 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
         {/*<div className="hidden flex-row h-fit p-[8px_12px] bg-[#fff] border-[1px] border-[#e0e0e0] rounded-[8px] shadow-message translate-x-[22px] translate-y-[-32px] group-hover:flex">*/}
         {/*  <p style={{ margin: 0 }}>action</p>*/}
         {/*</div>*/}
-    </div>
+    </Element>
 }
 
 export default function Message(props: MessageProps) {
@@ -240,7 +211,7 @@ export default function Message(props: MessageProps) {
     return (props.state !== "SENT" || editCache.cache.isEditing && editCache.cache.messageId === props.id) ?
         <BaseMessage {...props} isCompact={isCompact} isBare messageRef={ref} />
         : <ContextMenu.Root>
-            <ContextMenu.Trigger className={baseMessageStyle(props, isCompact, editCache)}>
+            <ContextMenu.Trigger className={baseMessageStyle(props, isCompact, editCache)} render={<li />}>
                 <BaseMessage {...props} isCompact={isCompact} messageRef={ref} />
             </ContextMenu.Trigger>
             <ContextMenu.Portal>
