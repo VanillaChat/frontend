@@ -13,6 +13,7 @@ import {RiQuestionFill} from "react-icons/ri";
 import Table from "@/components/UI/Table";
 import {serverLinkStyle} from "@/utils/serverLinkStyle";
 import {Tab} from "@/components/App/panes/Tab";
+import Avatar from "@/components/UI/Avatar";
 
 export const AdminPane = (props: {currentTab?: 'overview' | 'users' | 'instance-settings' | 'invite-codes'}) => {
     const [currentTab, setCurrentTab] = useState<typeof props.currentTab>(props.currentTab || 'overview');
@@ -42,7 +43,8 @@ export const AdminPane = (props: {currentTab?: 'overview' | 'users' | 'instance-
             header: 'Created By',
             filterFn: 'includesString',
             cell: ({cell}) => <div className="flex flex-row gap-2 text-center items-center">
-                <img src="https://cdn.discordapp.com/avatars/309427040908476416/f04949f40541d7036f687933d482a8dc.webp?size=1024" width="32px" height="32px" className="rounded-[100%]" alt="avatar" />
+                <Avatar width="32px" height="32px" id={cell.getValue().id} avatar={cell.getValue().avatar} className="rounded-[100%]" />
+                {/*<img src="https://cdn.discordapp.com/avatars/309427040908476416/f04949f40541d7036f687933d482a8dc.webp?size=1024" width="32px" height="32px" className="rounded-[100%]" alt="avatar" />*/}
                 <p>{cell.getValue().username}</p>
             </div>
         }),
@@ -95,7 +97,8 @@ export const AdminPane = (props: {currentTab?: 'overview' | 'users' | 'instance-
             header: 'Created By',
             filterFn: 'includesString',
             cell: ({cell}) => <div className="flex flex-row gap-2 text-center items-center">
-                <img src="https://cdn.discordapp.com/avatars/309427040908476416/f04949f40541d7036f687933d482a8dc.webp?size=1024" width="32px" height="32px" className="rounded-[100%]" alt="avatar" />
+                <Avatar width="32px" height="32px" id={cell.getValue().id} avatar={cell.getValue().avatar} className="rounded-[100%]" />
+                {/*<img src="https://cdn.discordapp.com/avatars/309427040908476416/f04949f40541d7036f687933d482a8dc.webp?size=1024" width="32px" height="32px" className="rounded-[100%]" alt="avatar" />*/}
                 <p>{cell.getValue().username}</p>
             </div>
         }),
@@ -103,8 +106,9 @@ export const AdminPane = (props: {currentTab?: 'overview' | 'users' | 'instance-
             header: 'Used By',
             filterFn: 'includesString',
             cell: ({cell}) => <div className="flex flex-row gap-2 text-center items-center">
-                <img src="https://cdn.discordapp.com/avatars/309427040908476416/f04949f40541d7036f687933d482a8dc.webp?size=1024" width="32px" height="32px" className="rounded-[100%]" alt="avatar" />
-                <p>{(cell.getValue() as any).user.username}</p>
+                <Avatar width="32px" height="32px" id={cell.getValue().user.id} avatar={cell.getValue().user.avatar} className="rounded-[100%]" />
+                {/*<img src="https://cdn.discordapp.com/avatars/309427040908476416/f04949f40541d7036f687933d482a8dc.webp?size=1024" width="32px" height="32px" className="rounded-[100%]" alt="avatar" />*/}
+                <p>{cell.getValue().user.username}</p>
             </div>
         })
     ], []);

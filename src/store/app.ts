@@ -1,5 +1,6 @@
 import {create} from "zustand/react";
 import {devtools} from "zustand/middleware";
+import {User} from "@/types/User";
 
 type AppStore = {
     hasModal: boolean;
@@ -9,9 +10,14 @@ type AppStore = {
             code: string;
             createdBy: {
                 username: string;
+                id: string;
+                avatar: string | null;
             };
             usedBy: {
                 username: string;
+                id: string;
+                avatar: string | null;
+                user: User;
             };
             used: boolean;
             id: string;

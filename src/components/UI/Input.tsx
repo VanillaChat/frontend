@@ -7,12 +7,8 @@ import cn from "@/utils/cn";
 
 type Props = {
     value?: string;
-    onChange?: (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => void;
     type?: HTMLInputTypeAttribute;
     placeholder?: string;
-    textarea?: boolean;
     id?: string;
     label?: string;
     labelStyle?: React.CSSProperties;
@@ -20,11 +16,18 @@ type Props = {
     containerClass?: ClassValue;
     icon?: string;
     className?: string;
-    innerRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
     onKeyDown?: (e: React.KeyboardEvent) => void;
     name?: string;
     autoFocus?: boolean;
-};
+} & ({
+     textarea: true;
+     onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+     innerRef?: React.RefObject<HTMLTextAreaElement | null>;
+} | {
+    textarea?: false;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    innerRef?: React.RefObject<HTMLInputElement | null>;
+});
 
 type FormInputProps<T extends FieldValues> = Props & {
     register: UseFormRegister<T>;
@@ -146,7 +149,7 @@ const Input: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
                 <label
                     htmlFor={props.name ?? props.id}
                     style={props.labelStyle}
-                    className="text-[#344054] dark:text-white dim:text-white text-[14px] font-medium mb-[10px]"
+                    className="text-[#344054] dark:text-white dim:text-white text-[14px] font-medium mb-[10px] w-fit"
                 >
                     {props.label}
                 </label>
