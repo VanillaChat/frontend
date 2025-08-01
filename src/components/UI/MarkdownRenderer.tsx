@@ -1,6 +1,7 @@
 import {FC, JSX, ReactNode} from "react";
 import ShikiHighlighter from "react-shiki";
 import {useTheme} from "@/context/ThemeProvider";
+import {nanoid} from "nanoid";
 
 interface SimpleMarkdownProps {
     children: string;
@@ -48,7 +49,7 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
             if (/^\s{0,2}[-*]\s+/.test(line)) {
                 const items: { text: string; indent: number }[] = [];
 
-                while (i < lines.length && /^\s{0,2}[-+*]\s+/.test(lines[i])) {
+                while (i < lines.length && /^\s{0,2}[-*]\s+/.test(lines[i])) {
                     const match = lines[i].match(/^(\s{0,2})[-+*]\s+(.*)/);
                     if (match) {
                         const [, space, content] = match;
@@ -113,80 +114,76 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
         return result;
     };
 
-    const parseInline = (text: string): ReactNode[] => {
-        const elements: ReactNode[] = [];
+    function parseInline(text: string): ReactNode[] {
+        const output: ReactNode[] = []
+        let i = 0
 
-        const regex = /(\[(.+?)]\((https?:\/\/[^\s)]+)\)|https?:\/\/[^\s<>"'`]+|\*\*\*([^*]+)\*\*\*|___([^_]+)___|\*\*([^*]+)\*\*|__([^_]+)__|\*([^*]+)\*|_([^_]+)_|`([^`]+)`)/g;
+        const tokens: {
+            regex: RegExp
+            render: (match: RegExpMatchArray) => ReactNode
+        }[] = [
+            {
+                regex: /~~(.+?)~~/,
+                render: ([, content]) => <del key={nanoid()}>{parseInline(content)}</del>,
+            },
+            {
+                regex: /\*\*\*(.+?)\*\*\*/,
+                render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
+            },
+            {
+                regex: /_\*\*(.+?)\*\*_?/,
+                render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
+            },
+            {
+                regex: /\*\*_([^_]+)_\*\*/,
+                render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
+            },
+            {
+                regex: /\*\*(.+?)\*\*/,
+                render: ([, content]) => <strong key={nanoid()}>{parseInline(content)}</strong>,
+            },
+            {
+                regex: /(?<!\*)\*(?!\*)(.+?)\*(?!\*)|_(.+?)_/,
+                render: (m) => <em key={nanoid()}>{parseInline(m[1] || m[2])}</em>,
+            },
+            { regex: /`([^`]+)`/, render: ([, code]) => <code className="px-1 py-0.5 rounded bg-muted font-mono text-sm">{code}</code> },
+            {
+                regex: /\[([^\]]+)]\(([^)]+)\)/,
+                render: ([, text, url]) => <a href={url} key={nanoid()} className="underline text-primary" target="_blank" rel="noopener noreferrer">{text}</a>,
+            },
+            {
+                regex: /\bhttps?:\/\/[^\s]+/,
+                render: ([url]) => <a href={url} key={nanoid()} className="underline text-primary" target="_blank" rel="noopener noreferrer">{url}</a>,
+            },
+        ]
 
-        let lastIndex = 0;
-        let match: RegExpExecArray | null;
+        while (i < text.length) {
+            let closestMatchIndex = text.length
+            let matchedToken: null | { match: RegExpMatchArray; render: (m: RegExpMatchArray) => ReactNode } = null
 
-        while ((match = regex.exec(text)) !== null) {
-            if (match.index > lastIndex) {
-                elements.push(text.slice(lastIndex, match.index));
+            for (const token of tokens) {
+                const match = token.regex.exec(text.slice(i))
+                if (match && match.index < closestMatchIndex) {
+                    closestMatchIndex = match.index
+                    matchedToken = { match, render: token.render }
+                }
             }
 
-            const full = match[0];
-
-            const [
-                ,
-                ,
-                linkText,
-                linkHref,
-                boldItalic1,
-                boldItalic2,
-                bold1,
-                bold2,
-                italic1,
-                italic2,
-                code,
-            ] = match;
-
-            if (linkText && linkHref) {
-                elements.push(
-                    <a key={elements.length} href={linkHref} target="_blank" rel="noopener noreferrer" className="text-[#0366d6] hover:underline select-text">
-                        {linkText}
-                    </a>
-                );
-            }
-            else if (/^https?:\/\//.test(full)) {
-                elements.push(
-                    <a key={elements.length} href={full} target="_blank" rel="noopener noreferrer" className="text-[#0366d6] hover:underline select-text">
-                        {full}
-                    </a>
-                );
-            }
-            else if (boldItalic1 || boldItalic2) {
-                elements.push(
-                    <strong key={elements.length}>
-                        <em>{boldItalic1 || boldItalic2}</em>
-                    </strong>
-                );
-            }
-            else if (bold1 || bold2) {
-                elements.push(<strong key={elements.length}>{bold1 || bold2}</strong>);
-            }
-            else if (italic1 || italic2) {
-                elements.push(<em key={elements.length}>{italic1 || italic2}</em>);
-            }
-            else if (code) {
-                elements.push(
-                    <code key={elements.length} className="bg-[#eee] px-[4px] border-[2px] p-1 rounded-[6px] border-[#ccc] font-mono">
-                        {code}
-                    </code>
-                );
+            if (!matchedToken) {
+                output.push(text.slice(i))
+                break
             }
 
-            lastIndex = regex.lastIndex;
+            if (matchedToken.match.index! > 0) {
+                output.push(text.slice(i, i + matchedToken.match.index!))
+            }
+
+            output.push(matchedToken.render(matchedToken.match))
+            i += matchedToken.match.index! + matchedToken.match[0].length
         }
 
-        if (lastIndex < text.length) {
-            elements.push(text.slice(lastIndex));
-        }
-
-        return elements;
-    };
-
+        return output
+    }
 
     return <div>{parseBlocks()}</div>;
 };
