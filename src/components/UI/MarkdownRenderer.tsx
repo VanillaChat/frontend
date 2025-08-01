@@ -10,7 +10,7 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
     const trimmed = children.replace(/^\n+|\n+$/g, "");
     const { theme } = useTheme();
 
-    const parseBlocks = (text: string): ReactNode[] => {
+    const parseBlocks = (): ReactNode[] => {
         const lines = trimmed.split("\n");
         const result: ReactNode[] = [];
 
@@ -188,5 +188,5 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
     };
 
 
-    return <div>{parseBlocks(trimmed)}</div>;
+    return <div>{parseBlocks()}</div>;
 };
