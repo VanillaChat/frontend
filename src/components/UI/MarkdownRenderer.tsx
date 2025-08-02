@@ -10,6 +10,7 @@ interface SimpleMarkdownProps {
 type InlineContext = {
     currentColor?: string;
     gradient?: boolean;
+    gradientColors?: string[];
 }
 
 export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
@@ -164,9 +165,14 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
             },
         },
         {
-            regex: /\[gradient]/,
-            render: (_m, ctx) => {
+            regex: /\[gradient(?::(#[0-9a-fA-F]{3,6}(?:,#[0-9a-fA-F]{3,6})+))?]/,
+            render: (m, ctx) => {
                 ctx.gradient = true
+                if (m[1]) {
+                    ctx.gradientColors = m[1].split(",").map(s => s.trim())
+                } else {
+                    ctx.gradientColors = ["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+                }
                 return null
             },
         },
@@ -175,6 +181,7 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
             render: (_m, ctx) => {
                 ctx.currentColor = undefined
                 ctx.gradient = false
+                ctx.gradientColors = undefined
                 return null
             },
         },
@@ -214,11 +221,18 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
             }
         }
 
-        if (ctx.gradient) {
+        if (ctx.gradient && ctx.gradientColors?.length) {
+            const gradientStyle = `linear-gradient(to right, ${ctx.gradientColors.join(",")})`
+
             return [
                 <span
-                    className="bg-gradient-to-r from-pink-500 via-yellow-500 to-blue-500 bg-clip-text text-transparent"
                     key="gradient"
+                    style={{
+                        backgroundImage: gradientStyle,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        display: "inline-block",
+                    }}
                 >
                   {parts}
                 </span>,
@@ -227,23 +241,6 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
 
         return parts
     }
-
-    // function applyGradient(text: string): ReactNode {
-    //     const colors = [
-    //         "#ff0000", "#ff7f00", "#ffff00",
-    //         "#00ff00", "#0000ff", "#4b0082", "#8f00ff"
-    //     ]
-    //
-    //     return (
-    //         <>
-    //             {[...text].map((char, i) => (
-    //                 <span key={i} style={{ color: colors[i % colors.length] }}>
-    //       {char}
-    //     </span>
-    //             ))}
-    //         </>
-    //     )
-    // }
 
     return <div>{parseBlocks()}</div>;
 };
