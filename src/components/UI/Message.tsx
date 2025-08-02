@@ -125,7 +125,6 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 )}
             </div>
             
-            {/* Content column */}
             <div className="flex flex-col justify-start items-start max-w-[100%] w-[100%]">
                     {!props.isCompact &&
                         <div>
@@ -186,9 +185,6 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 )}
             </div>
         </div>
-        {/*<div className="hidden flex-row h-fit p-[8px_12px] bg-[#fff] border-[1px] border-[#e0e0e0] rounded-[8px] shadow-message translate-x-[22px] translate-y-[-32px] group-hover:flex">*/}
-        {/*  <p style={{ margin: 0 }}>action</p>*/}
-        {/*</div>*/}
     </Element>
 }
 

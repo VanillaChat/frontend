@@ -37,6 +37,8 @@ export type InvitesState = {
   hasMembershipStatus: (code: string) => boolean;
   fetchInvite: (code: string) => Promise<InviteData | null>;
   clearCache: () => void;
+  clearFetchError: (code: string) => void;
+  retryFailedInvites: () => void;
 };
 
 export const useInvites = create<InvitesState>()(
@@ -68,6 +70,27 @@ export const useInvites = create<InvitesState>()(
     
     hasMembershipStatus: (code: string) => code in get().membershipStatus,
     
+    clearFetchError: (code: string) => 
+      set((state) => ({
+        fetchErrors: { ...state.fetchErrors, [code]: false }
+      })),
+    
+    retryFailedInvites: () => {
+      const state = get();
+      const failedCodes = Object.keys(state.fetchErrors).filter(code => state.fetchErrors[code]);
+      
+      const updatedFetchErrors = { ...state.fetchErrors };
+      failedCodes.forEach(code => {
+        updatedFetchErrors[code] = false;
+      });
+      
+      set({ fetchErrors: updatedFetchErrors });
+      
+      failedCodes.forEach(code => {
+        get().fetchInvite(code);
+      });
+    },
+    
     fetchInvite: async (code: string) => {
       const state = get();
 
@@ -88,15 +111,29 @@ export const useInvites = create<InvitesState>()(
       }));
       
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
         const response = await fetch(`${import.meta.env.VITE_API_URL}/invites/${code}`, {
-          credentials: 'include'
+          credentials: 'include',
+          signal: controller.signal
         });
         
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
-          set((state) => ({
-            isLoading: { ...state.isLoading, [code]: false },
-            fetchErrors: { ...state.fetchErrors, [code]: true }
-          }));
+          // Always mark as not loading, but only mark as error in non-production
+          // or if explicitly told to mark errors (will be handled by component)
+          if (!import.meta.env.PROD) {
+            set((state) => ({
+              isLoading: { ...state.isLoading, [code]: false },
+              fetchErrors: { ...state.fetchErrors, [code]: true }
+            }));
+          } else {
+            set((state) => ({
+              isLoading: { ...state.isLoading, [code]: false }
+            }));
+          }
           return null;
         }
         
@@ -107,10 +144,19 @@ export const useInvites = create<InvitesState>()(
         return data;
       } catch (error) {
         console.error("Failed to fetch invite:", error);
-        set((state) => ({
-          isLoading: { ...state.isLoading, [code]: false },
-          fetchErrors: { ...state.fetchErrors, [code]: true }
-        }));
+        
+        // Always mark as not loading, but only mark as error in non-production
+        // or if explicitly told to mark errors (will be handled by component)
+        if (!import.meta.env.PROD) {
+          set((state) => ({
+            isLoading: { ...state.isLoading, [code]: false },
+            fetchErrors: { ...state.fetchErrors, [code]: true }
+          }));
+        } else {
+          set((state) => ({
+            isLoading: { ...state.isLoading, [code]: false }
+          }));
+        }
         return null;
       }
     },
