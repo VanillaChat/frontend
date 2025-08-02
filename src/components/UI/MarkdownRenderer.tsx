@@ -193,7 +193,7 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
                 const nextMatchIndex = tokens
                     .map((t) => t.regex.exec(remaining)?.index)
                     .filter((i) => i !== undefined && i >= 0)
-                    .reduce((min, i) => Math.min(min!, i!), remaining.length)
+                    .reduce((min, i) => Math.min(min, i!), remaining.length)
 
                 const literal = remaining.slice(0, nextMatchIndex)
                 const node = ctx.currentColor
