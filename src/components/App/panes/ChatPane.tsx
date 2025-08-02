@@ -16,14 +16,14 @@ export const ChatPaneStub: React.FC = () => {
   const isDM = location.pathname.includes("@me");
 
   return (
-      <div className="w-[100vw] flex flex-col dark:bg-[#262622] dim:bg-[#141413]">
+      <div className="w-full h-full flex flex-col dark:bg-[#262622] dim:bg-[#141413]">
         <div className="bg-[#FBFBFB] dark:bg-[#36362E] dim:bg-[#171717] dark:border-b-[#36362E] dim:border-b-[#171717] h-[52px] p-[20px_25px] flex flex-row border-b-[1px] border-b-[#e0e0e0] items-center gap-[5px]">
           <h1 className="text-[24px] font-normal m-0">{isDM ? "@" : "#"}</h1>
           <p className="text-[16px] font-medium">{isDM ? "Unknown User" : "Unknown Channel"}</p>
         </div>
         <Input
             placeholder="Message #Unknown Channel"
-            containerClass="flex mb-[10px] w-[98%] h-[45px] text-center justify-self-center self-center mt-auto [&>input]:resize-none [&>input>:shadow-none"
+            containerClass="flex mb-[30px] w-[98%] h-[45px] text-center justify-self-center self-center mt-auto [&>input]:resize-none [&>input]:shadow-none"
             className="resize-none shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
             textarea
             id="text-input"
@@ -267,13 +267,13 @@ const ChatPane: React.FC = () => {
   }, [messages.data, messages.savedContent, clearTypingIndicator, channelId]);
 
   return (
-    <div className="w-[100vw] flex flex-col dark:bg-[#262622] dim:bg-[#141413]">
+    <div className="w-full h-full flex flex-col dark:bg-[#262622] dim:bg-[#141413]">
       <div className="bg-[#FBFBFB] dark:bg-[#36362E] dim:bg-[#171717] dark:border-b-[#36362E] dim:border-b-[#171717] h-[52px] p-[20px_25px] flex flex-row border-b-[1px] border-b-[#e0e0e0] items-center gap-[5px]">
         <h1 className="text-[24px] font-normal m-0">{isDM ? "@" : "#"}</h1>
         <p className="text-[16px] font-medium">{isDM ? "John Doe" : channel?.name}</p>
       </div>
       <ul
-          className="max-w-[100%] h-[88vh] pl-0 p-[10px] m-0 flex flex-col justify-start items-start min-w-0 dark:bg-[#262622] dim:bg-[#141413] list-none"
+          className="max-w-[100%] h-[calc(100vh-140px)] pl-0 p-[10px] m-0 flex flex-col justify-start items-start min-w-0 dark:bg-[#262622] dim:bg-[#141413] list-none"
           style={{
             overflow: isProfileOpen ? "hidden" : "auto"
           }}
@@ -367,7 +367,7 @@ const ChatPane: React.FC = () => {
       }
       <Input
         placeholder={`Message #${channel?.name}`}
-        containerClass="flex mb-[10px] w-[98%] text-center justify-self-center self-center mt-auto mb-6 [&>input]>:shadow-none z-[999]"
+        containerClass="flex w-[96%] text-center justify-self-center self-center mt-auto mb-[25px] [&>input]:shadow-none z-[999]"
         className="resize-none shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
         textarea
         innerRef={inputRef}

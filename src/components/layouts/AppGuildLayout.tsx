@@ -34,11 +34,9 @@ export default function AppGuildLayout() {
   // );
 
     return (
-        <main id="app" className="h-[100dvh] flex flex-row" onContextMenu={(e) => e.preventDefault()}>
-            <div className="flex shrink-0">
-                <GuildSidebar />
-                <ChannelSidebar />
-            </div>
+        <main id="app" className="h-[100dvh] grid grid-cols-[72px_300px_1fr_auto] overflow-x-hidden" onContextMenu={(e) => e.preventDefault()}>
+            <GuildSidebar />
+            <ChannelSidebar />
             <Outlet />
         </main>
     );

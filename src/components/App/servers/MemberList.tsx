@@ -65,7 +65,7 @@ const MemberList: React.FC = () => {
     );
 
     return (
-        <div className="bg-[#f2f2f2] w-[500px] p-[5px_8px] dark:bg-[#2C2B27] dim:bg-[#070707]">
+        <div className="bg-[#f2f2f2] w-[280px] p-[5px_8px] dark:bg-[#2C2B27] dim:bg-[#070707]">
             <div ref={parentRef} className="overflow-auto h-[100%]">
                 <div
                     className="flex flex-col gap-[8px] w-[100%] relative"
