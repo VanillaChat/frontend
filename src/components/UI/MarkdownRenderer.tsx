@@ -1,4 +1,4 @@
-import {FC, Fragment, JSX, ReactNode} from "react";
+import {FC, JSX, ReactNode} from "react";
 import ShikiHighlighter from "react-shiki";
 import {useTheme} from "@/context/ThemeProvider";
 import {nanoid} from "nanoid";
@@ -156,19 +156,19 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
             render: ([url]) => <a href={url} key={nanoid()} className="underline text-primary" target="_blank" rel="noopener noreferrer">{url}</a>,
         },
         {
-            regex: /\[#([0-9a-fA-F]{3,6})]([^[]+?)(?=\[#|\/r]|\n|$)/,
-            render: (m, ctx) => {
-                ctx.currentColor = `#${m[1]}`;
-                return <span key={nanoid()} style={{ color: ctx.currentColor }}>{parseInline(m[2], ctx)}</span>;
+            regex: /\[#([0-9a-fA-F]{3,6})]/,
+            render: (m: RegExpMatchArray, ctx: InlineContext) => {
+                ctx.currentColor = `#${m[1]}`
+                return null
             },
         },
         {
             regex: /\[\/r]/,
-            render: (_, ctx) => {
-                ctx.currentColor = undefined;
-                return <Fragment key={nanoid()}></Fragment>;
+            render: (_: RegExpMatchArray, ctx: InlineContext) => {
+                ctx.currentColor = undefined
+                return null
             },
-        }
+        },
     ]
 
     function parseInline(text: string, ctx: InlineContext = {}): ReactNode[] {
@@ -181,7 +181,8 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
             for (const token of tokens) {
                 const match = token.regex.exec(remaining)
                 if (match?.index === 0) {
-                    parts.push(token.render(match, ctx))
+                    const rendered = token.render(match, ctx)
+                    if (rendered !== null) parts.push(rendered)
                     remaining = remaining.slice(match[0].length)
                     matched = true
                     break
@@ -189,17 +190,17 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
             }
 
             if (!matched) {
-                const nextTokenStart = tokens
-                    .map(t => t.regex.exec(remaining)?.index)
-                    .filter(i => i !== undefined && i > 0)
+                const nextMatchIndex = tokens
+                    .map((t) => t.regex.exec(remaining)?.index)
+                    .filter((i) => i !== undefined && i >= 0)
                     .reduce((min, i) => Math.min(min!, i!), remaining.length)
 
-                const literal = remaining.slice(0, nextTokenStart)
-                parts.push(
-                    ctx.currentColor
-                        ? <span style={{ color: ctx.currentColor }}>{literal}</span>
-                        : literal
-                )
+                const literal = remaining.slice(0, nextMatchIndex)
+                const node = ctx.currentColor
+                    ? <span style={{ color: ctx.currentColor }}>{literal}</span>
+                    : literal
+
+                parts.push(node)
                 remaining = remaining.slice(literal.length)
             }
         }
