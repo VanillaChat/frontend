@@ -171,6 +171,11 @@ const ChatPane: React.FC = () => {
     }
   }, [messages.isLoadingNewer, messages.data[channelId!]]);
 
+  // Reset isInitialLoad when guildId changes to ensure scrolling works when switching servers
+  useEffect(() => {
+    isInitialLoad.current = true;
+  }, [guildId]);
+
   useEffect(() => {
     if (msgRef.current && isInitialLoad.current) {
       setTimeout(() => {
