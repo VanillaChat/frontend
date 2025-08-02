@@ -26,9 +26,15 @@ export type InviteData = {
 export type InvitesState = {
   cache: Record<string, InviteData>;
   isLoading: Record<string, boolean>;
+  fetchErrors: Record<string, boolean>;
+  membershipStatus: Record<string, boolean>;
   addInvite: (code: string, data: InviteData) => void;
   getInvite: (code: string) => InviteData | undefined;
   hasInvite: (code: string) => boolean;
+  hasFetchError: (code: string) => boolean;
+  getMembershipStatus: (code: string) => boolean | undefined;
+  setMembershipStatus: (code: string, isMember: boolean) => void;
+  hasMembershipStatus: (code: string) => boolean;
   fetchInvite: (code: string) => Promise<InviteData | null>;
   clearCache: () => void;
 };
@@ -37,22 +43,40 @@ export const useInvites = create<InvitesState>()(
   devtools((set, get) => ({
     cache: {},
     isLoading: {},
+    fetchErrors: {},
+    membershipStatus: {},
     
     addInvite: (code: string, data: InviteData) => 
       set((state) => ({
         cache: { ...state.cache, [code]: data },
-        isLoading: { ...state.isLoading, [code]: false }
+        isLoading: { ...state.isLoading, [code]: false },
+        fetchErrors: { ...state.fetchErrors, [code]: false }
       })),
     
     getInvite: (code: string) => get().cache[code],
     
     hasInvite: (code: string) => !!get().cache[code],
     
+    hasFetchError: (code: string) => typeof get().fetchErrors[code] !== "undefined",
+    
+    getMembershipStatus: (code: string) => get().membershipStatus[code],
+    
+    setMembershipStatus: (code: string, isMember: boolean) => 
+      set((state) => ({
+        membershipStatus: { ...state.membershipStatus, [code]: isMember }
+      })),
+    
+    hasMembershipStatus: (code: string) => code in get().membershipStatus,
+    
     fetchInvite: async (code: string) => {
       const state = get();
 
       if (state.cache[code]) {
         return state.cache[code];
+      }
+
+      if (state.fetchErrors[code]) {
+        return null;
       }
 
       if (state.isLoading[code]) {
@@ -70,7 +94,8 @@ export const useInvites = create<InvitesState>()(
         
         if (!response.ok) {
           set((state) => ({
-            isLoading: { ...state.isLoading, [code]: false }
+            isLoading: { ...state.isLoading, [code]: false },
+            fetchErrors: { ...state.fetchErrors, [code]: true }
           }));
           return null;
         }
@@ -83,12 +108,13 @@ export const useInvites = create<InvitesState>()(
       } catch (error) {
         console.error("Failed to fetch invite:", error);
         set((state) => ({
-          isLoading: { ...state.isLoading, [code]: false }
+          isLoading: { ...state.isLoading, [code]: false },
+          fetchErrors: { ...state.fetchErrors, [code]: true }
         }));
         return null;
       }
     },
     
-    clearCache: () => set({ cache: {}, isLoading: {} })
+    clearCache: () => set({ cache: {}, isLoading: {}, fetchErrors: {}, membershipStatus: {} })
   }))
 );

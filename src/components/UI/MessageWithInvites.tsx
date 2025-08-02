@@ -4,6 +4,7 @@ import { processMessageContent } from "@/utils/inviteUtils";
 import { useInvites, InviteData } from "@/store/invites";
 import InviteEmbed from "@/components/UI/InviteEmbed";
 import { MarkdownRenderer } from "@/components/UI/MarkdownRenderer";
+import { FaExclamationCircle } from "react-icons/fa";
 
 interface MessageWithInvitesProps {
   content: string;
@@ -14,6 +15,7 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
   const [inviteCodes, setInviteCodes] = useState<string[]>([]);
   const [inviteData, setInviteData] = useState<Record<string, InviteData>>({});
   const [memberStatus, setMemberStatus] = useState<Record<string, boolean>>({});
+  const [fetchErrors, setFetchErrors] = useState<Record<string, boolean>>({});
   const invites = useInvites();
   const navigate = useNavigate();
 
@@ -23,50 +25,43 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
     setInviteCodes(inviteCodes);
   }, [content]);
 
-  const checkMembership = async (code: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/invites/${code}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 409) {
-        const data = await response.json();
-        return data.code === 'ALREADY_A_MEMBER';
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error checking membership:', error);
-      return false;
-    }
-  };
-
   useEffect(() => {
     const fetchInvites = async () => {
       const inviteDataMap: Record<string, InviteData> = {};
+      const fetchErrorsMap: Record<string, boolean> = {};
       const memberStatusMap: Record<string, boolean> = {};
       
       for (const code of inviteCodes) {
+        if (invites.hasFetchError(code)) {
+          fetchErrorsMap[code] = true;
+          continue;
+        }
+
         if (invites.hasInvite(code)) {
           const data = invites.getInvite(code);
           if (data) {
             inviteDataMap[code] = data;
-            memberStatusMap[code] = await checkMembership(code);
+
+            if (invites.hasMembershipStatus(code)) {
+              memberStatusMap[code] = invites.getMembershipStatus(code) || false;
+            }
           }
         } else {
           const data = await invites.fetchInvite(code);
           if (data) {
             inviteDataMap[code] = data;
-            memberStatusMap[code] = await checkMembership(code);
+
+            if (invites.hasMembershipStatus(code)) {
+              memberStatusMap[code] = invites.getMembershipStatus(code) || false;
+            }
+          } else if (invites.hasFetchError(code)) {
+            fetchErrorsMap[code] = true;
           }
         }
       }
       
       setInviteData(inviteDataMap);
+      setFetchErrors(fetchErrorsMap);
       setMemberStatus(memberStatusMap);
     };
     
@@ -76,9 +71,13 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
   }, [inviteCodes, invites]);
 
   const handleJoinServer = async (code: string) => {
-    if (memberStatus[code]) {
-      const invite = inviteData[code];
-      if (invite) {
+    const invite = inviteData[code];
+    if (!invite) return;
+
+    if (invites.hasMembershipStatus(code)) {
+      const isMember = invites.getMembershipStatus(code);
+
+      if (isMember) {
         navigate(`/channels/${invite.guildId}/${invite.channel.id}`);
         return;
       }
@@ -92,12 +91,15 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
       
       if (response.ok) {
         const data = await response.json();
+        invites.setMembershipStatus(code, true);
+        setMemberStatus(prev => ({...prev, [code]: true}));
         navigate(`/channels/${data.guild.id}/${data.guild.channels[0].id}`);
       } else if (response.status === 409) {
         const data = await response.json();
-        if (data.code === 'ALREADY_A_MEMBER' && inviteData[code]) {
+        if (data.code === 'ALREADY_A_MEMBER') {
+          invites.setMembershipStatus(code, true);
           setMemberStatus(prev => ({...prev, [code]: true}));
-          navigate(`/channels/${inviteData[code].guildId}/${inviteData[code].channel.id}`);
+          navigate(`/channels/${invite.guildId}/${invite.channel.id}`);
         } else {
           console.error('Failed to join server:', data);
         }
@@ -109,22 +111,42 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
     }
   };
 
+  const InviteErrorEmbed: React.FC<{ code: string }> = () => {
+    return (
+      <div className="flex flex-col border rounded-md p-3 my-2 max-w-[400px] bg-[#f0f0e8] dark:bg-[#49473f] dim:bg-[#282828] border-[#D3D2C8] dark:border-[#464540] dim:border-[#302F2A]">
+        <div className="flex items-center gap-2 text-red-500">
+          <FaExclamationCircle size={16} />
+          <span className="font-medium">Failed to load invite</span>
+        </div>
+        <p className="text-sm mt-1 text-gray-600 dark:text-gray-300 dim:text-gray-400">
+          The invite information could not be loaded. The invite may be invalid or expired.
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div>
       <MarkdownRenderer>{processedContent}</MarkdownRenderer>
       
       {inviteCodes.map((code) => {
+        if (fetchErrors[code]) {
+          return <InviteErrorEmbed key={`invite-error-${code}`} code={code} />;
+        }
+
         const invite = inviteData[code];
-        if (!invite) return null;
-        
-        return (
-          <InviteEmbed 
-            key={`invite-${code}`} 
-            invite={invite} 
-            isMember={memberStatus[code] || false}
-            onClick={() => handleJoinServer(code)}
-          />
-        );
+        if (invite) {
+          return (
+            <InviteEmbed 
+              key={`invite-${code}`} 
+              invite={invite} 
+              isMember={memberStatus[code] || false}
+              onClick={() => handleJoinServer(code)}
+            />
+          );
+        }
+
+        return null;
       })}
     </div>
   );
