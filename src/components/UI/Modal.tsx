@@ -2,7 +2,6 @@ import {createPortal} from "react-dom";
 import {ReactNode, ReactPortal, useEffect} from "react";
 import Button from "./Button";
 import {AnimatePresence, motion} from "framer-motion";
-import Server from "../../icons/Server.svg";
 import ChipIcon from "./ChipIcon";
 import {useTranslation} from "react-i18next";
 
@@ -17,6 +16,7 @@ type ModalProps = {
   onClose?: () => void;
   confirmDisabled?: boolean;
   closable?: boolean;
+  icon?: ReactNode;
 };
 
 const Modal = ({
@@ -28,7 +28,8 @@ const Modal = ({
                  confirmText,
                  subtitle,
                  closable = true,
-                 confirmDisabled
+                 confirmDisabled,
+                 icon
                }: ModalProps): ReactPortal => {
   const { t } = useTranslation();
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -75,7 +76,7 @@ const Modal = ({
                   onClick={(e) => e.stopPropagation()}
               >
                 <header className="relative flex justify-center items-center flex-col">
-                  <ChipIcon icon={Server} />
+                  <ChipIcon icon={icon} />
                   <p className="text-center font-semibold text-[18px] flex flex-col items-center justify-center mt-[15px] mb-[5px]">{title}</p>
                   {subtitle && <p className="text-[#667085] dark:text-white dim:text-white text-[14px] font-normal text-center mt-[5px]">{subtitle}</p>}
                 </header>
