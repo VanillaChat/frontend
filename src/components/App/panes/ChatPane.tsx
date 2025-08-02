@@ -367,7 +367,7 @@ const ChatPane: React.FC = () => {
       }
       <Input
         placeholder={`Message #${channel?.name}`}
-        containerClass="flex mb-[10px] w-[98%] text-center justify-self-center self-center mt-auto mb-3 [&>input]>:shadow-none z-[999]"
+        containerClass="flex mb-[10px] w-[98%] text-center justify-self-center self-center mt-auto mb-6 [&>input]>:shadow-none z-[999]"
         className="resize-none shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
         textarea
         innerRef={inputRef}
