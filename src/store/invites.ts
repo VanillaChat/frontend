@@ -57,7 +57,7 @@ export const useInvites = create<InvitesState>()(
     
     hasInvite: (code: string) => !!get().cache[code],
     
-    hasFetchError: (code: string) => typeof get().fetchErrors[code] !== "undefined",
+    hasFetchError: (code: string) => get().fetchErrors[code],
     
     getMembershipStatus: (code: string) => get().membershipStatus[code],
     
