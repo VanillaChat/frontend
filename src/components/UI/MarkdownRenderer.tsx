@@ -143,7 +143,7 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
                 render: ([, content]) => <strong key={nanoid()}>{parseInline(content)}</strong>,
             },
             {
-                regex: /(?<!\*)\*(?!\*)(.+?)\*(?!\*)|_(.+?)_/,
+                regex: /(?<!\w)_(?!_)(.+?)(?<!_)_(?!\w)|(?<!\w)\*(?!\*)(.+?)(?<!\*)\*(?!\w)/,
                 render: (m) => <em key={nanoid()}>{parseInline(m[1] || m[2])}</em>,
             },
             { regex: /`([^`]+)`/, render: ([, code]) => <code key={nanoid()} className="px-1 py-0.5 rounded bg-muted font-mono text-sm">{code}</code> },

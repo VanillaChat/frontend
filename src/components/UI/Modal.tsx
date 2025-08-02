@@ -76,7 +76,7 @@ const Modal = ({
                   onClick={(e) => e.stopPropagation()}
               >
                 <header className="relative flex justify-center items-center flex-col">
-                  <ChipIcon icon={icon} />
+                    {icon && <ChipIcon icon={icon} />}
                   <p className="text-center font-semibold text-[18px] flex flex-col items-center justify-center mt-[15px] mb-[5px]">{title}</p>
                   {subtitle && <p className="text-[#667085] dark:text-white dim:text-white text-[14px] font-normal text-center mt-[5px]">{subtitle}</p>}
                 </header>

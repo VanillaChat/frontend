@@ -17,7 +17,7 @@ import {useParams} from "react-router-dom";
 import Avatar from "@/components/UI/Avatar";
 import UserProfile from "@/components/UI/extension/UserProfile";
 import {usePresence} from "@/store/presence";
-import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
+import MessageWithInvites from "@/components/UI/MessageWithInvites";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(isToday);
@@ -121,7 +121,6 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                         }
                     </UserProfile>
                 ) : (
-                    // Empty placeholder for compact messages to maintain alignment
                     <div className="w-[42px] h-auto min-h-[1em] opacity-0"></div>
                 )}
             </div>
@@ -156,9 +155,7 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                 {
                     (!editCache.cache.isEditing || editCache.cache.messageId !== props.id) &&
                     <div className="flex flex-col gap-1">
-                        <MarkdownRenderer>
-                            {props.content}
-                        </MarkdownRenderer>
+                        <MessageWithInvites content={props.content} />
                         {props.updatedAt && <small className="opacity-45 text-[12px]">(edited)</small>}
                     </div>
                 }
