@@ -19,6 +19,6 @@ export type Channel = {
 
 export type ServerMember = {
   id: string;
-  nickname: string;
+  nickname: string | null;
   user: User;
 }

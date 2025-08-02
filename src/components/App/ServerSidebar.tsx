@@ -17,6 +17,7 @@ import CurrentUserProfile from "@/components/UI/extension/CurrentUserProfile";
 import {useVirtualizer} from "@tanstack/react-virtual";
 import {AccountSettingsPane} from "@/components/App/panes/AccountSettingsPane";
 import Avatar from "@/components/UI/Avatar";
+import Server from "../../icons/Server.svg";
 
 const ServerCreateSchema = z.object({
     name: z.string().min(2, "app.modals.serverCreate.nameMinChars").max(64, "app.modals.serverCreate.nameMaxChars"),
@@ -38,6 +39,7 @@ const ServerAddModal: React.FC = () => {
     const [globalError, setGlobalError] = React.useState<string | null>(null);
     const [mode, setMode] = React.useState<'create' | 'join'>('create');
     const appStore = useAppStore();
+    const session = useSession();
     const {
         register: registerCreate,
         handleSubmit: handleSubmitCreate,
@@ -78,6 +80,13 @@ const ServerAddModal: React.FC = () => {
             if (createdGuild.status === 200) {
                 servers.insert(json.guild);
                 channels.set(json.guild.id, json.channels);
+                if (session.currentUser) {
+                    members.setMembers(json.guild.id, [{
+                        id: session.currentUser.id,
+                        nickname: null,
+                        user: session.currentUser
+                    }]);
+                }
                 setModal(false);
                 appStore.setHasModal(false);
                 navigate(`/channels/${json.guild.id}/${json.channels[0].id}`);
@@ -88,7 +97,7 @@ const ServerAddModal: React.FC = () => {
         } catch (e) {
             console.error(e);
         }
-    }, []);
+    }, [session.currentUser]);
 
     const onSubmitJoin: SubmitHandler<z.infer<typeof ServerJoinSchema>> = React.useCallback(async (data) => {
         try {
@@ -149,6 +158,9 @@ const ServerAddModal: React.FC = () => {
                 else handleSubmitJoin(onSubmitJoin)();
             }}
             subtitle={t("app.modals.serverCreate.subtitle")}
+            icon={
+                <img src={Server} alt="icon" className="w-[32px] h-[20px]" />
+            }
         >
             {globalError && <Alert variant="destructive" title="Server error">{t(globalError)}</Alert>}
             <Tabs
@@ -246,7 +258,7 @@ const ServerSidebar: React.FC = () => {
                         })
                 }
             </div>
-            <div className="justify-self-end mt-auto gap-2 mb-2 items-center justify-center flex flex-col">
+            <div className="justify-self-end mt-auto gap-2 mb-4 items-center justify-center flex flex-col">
                 {((session.currentUser!.flags & 1 << 0) === 1 << 0) && <AdminPane />}
                 <CurrentUserProfile user={session.currentUser!}>
                     <Avatar avatar={session.currentUser?.avatar} id={session.currentUser?.id!} className="cursor-pointer" width="40px" height="40px" />
