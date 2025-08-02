@@ -1,10 +1,14 @@
-import {FC, JSX, ReactNode} from "react";
+import {FC, Fragment, JSX, ReactNode} from "react";
 import ShikiHighlighter from "react-shiki";
 import {useTheme} from "@/context/ThemeProvider";
 import {nanoid} from "nanoid";
 
 interface SimpleMarkdownProps {
     children: string;
+}
+
+type InlineContext = {
+    currentColor?: string
 }
 
 export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
@@ -114,75 +118,93 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
         return result;
     };
 
-    function parseInline(text: string): ReactNode[] {
-        const output: ReactNode[] = []
-        let i = 0
+    const tokens: {
+        regex: RegExp
+        render: (match: RegExpMatchArray, ctx: InlineContext) => ReactNode
+    }[] = [
+        {
+            regex: /~~(.+?)~~/,
+            render: ([, content]) => <del key={nanoid()}>{parseInline(content)}</del>,
+        },
+        {
+            regex: /\*\*\*(.+?)\*\*\*/,
+            render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
+        },
+        {
+            regex: /_\*\*(.+?)\*\*_?/,
+            render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
+        },
+        {
+            regex: /\*\*_([^_]+)_\*\*/,
+            render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
+        },
+        {
+            regex: /\*\*(.+?)\*\*/,
+            render: ([, content]) => <strong key={nanoid()}>{parseInline(content)}</strong>,
+        },
+        {
+            regex: /(?<!\w)_(?!_)(.+?)(?<!_)_(?!\w)|(?<!\w)\*(?!\*)(.+?)(?<!\*)\*(?!\w)/,
+            render: (m) => <em key={nanoid()}>{parseInline(m[1] || m[2])}</em>,
+        },
+        { regex: /`([^`]+)`/, render: ([, code]) => <code key={nanoid()} className="px-1 py-0.5 rounded bg-muted font-mono text-sm">{code}</code> },
+        {
+            regex: /\[([^\]]+)]\(([^)]+)\)/,
+            render: ([, text, url]) => <a href={url} key={nanoid()} className="underline text-primary" target="_blank" rel="noopener noreferrer">{text}</a>,
+        },
+        {
+            regex: /\bhttps?:\/\/[^\s]+/,
+            render: ([url]) => <a href={url} key={nanoid()} className="underline text-primary" target="_blank" rel="noopener noreferrer">{url}</a>,
+        },
+        {
+            regex: /\[#([0-9a-fA-F]{3,6})]([^[]+?)(?=\[#|\/r]|\n|$)/,
+            render: (m, ctx) => {
+                ctx.currentColor = `#${m[1]}`;
+                return <span key={nanoid()} style={{ color: ctx.currentColor }}>{parseInline(m[2], ctx)}</span>;
+            },
+        },
+        {
+            regex: /\[\/r]/,
+            render: (_, ctx) => {
+                ctx.currentColor = undefined;
+                return <Fragment key={nanoid()}></Fragment>;
+            },
+        }
+    ]
 
-        const tokens: {
-            regex: RegExp
-            render: (match: RegExpMatchArray) => ReactNode
-        }[] = [
-            {
-                regex: /~~(.+?)~~/,
-                render: ([, content]) => <del key={nanoid()}>{parseInline(content)}</del>,
-            },
-            {
-                regex: /\*\*\*(.+?)\*\*\*/,
-                render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
-            },
-            {
-                regex: /_\*\*(.+?)\*\*_?/,
-                render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
-            },
-            {
-                regex: /\*\*_([^_]+)_\*\*/,
-                render: ([, content]) => <strong key={nanoid()}><em>{parseInline(content)}</em></strong>,
-            },
-            {
-                regex: /\*\*(.+?)\*\*/,
-                render: ([, content]) => <strong key={nanoid()}>{parseInline(content)}</strong>,
-            },
-            {
-                regex: /(?<!\w)_(?!_)(.+?)(?<!_)_(?!\w)|(?<!\w)\*(?!\*)(.+?)(?<!\*)\*(?!\w)/,
-                render: (m) => <em key={nanoid()}>{parseInline(m[1] || m[2])}</em>,
-            },
-            { regex: /`([^`]+)`/, render: ([, code]) => <code key={nanoid()} className="px-1 py-0.5 rounded bg-muted font-mono text-sm">{code}</code> },
-            {
-                regex: /\[([^\]]+)]\(([^)]+)\)/,
-                render: ([, text, url]) => <a href={url} key={nanoid()} className="underline text-primary" target="_blank" rel="noopener noreferrer">{text}</a>,
-            },
-            {
-                regex: /\bhttps?:\/\/[^\s]+/,
-                render: ([url]) => <a href={url} key={nanoid()} className="underline text-primary" target="_blank" rel="noopener noreferrer">{url}</a>,
-            },
-        ]
+    function parseInline(text: string, ctx: InlineContext = {}): ReactNode[] {
+        const parts: ReactNode[] = []
+        let remaining = text
 
-        while (i < text.length) {
-            let closestMatchIndex = text.length
-            let matchedToken: null | { match: RegExpMatchArray; render: (m: RegExpMatchArray) => ReactNode } = null
+        while (remaining) {
+            let matched = false
 
             for (const token of tokens) {
-                const match = token.regex.exec(text.slice(i))
-                if (match && match.index < closestMatchIndex) {
-                    closestMatchIndex = match.index
-                    matchedToken = { match, render: token.render }
+                const match = token.regex.exec(remaining)
+                if (match?.index === 0) {
+                    parts.push(token.render(match, ctx))
+                    remaining = remaining.slice(match[0].length)
+                    matched = true
+                    break
                 }
             }
 
-            if (!matchedToken) {
-                output.push(text.slice(i))
-                break
-            }
+            if (!matched) {
+                const nextTokenStart = tokens
+                    .map(t => t.regex.exec(remaining)?.index)
+                    .filter(i => i !== undefined && i > 0)
+                    .reduce((min, i) => Math.min(min!, i!), remaining.length)
 
-            if (matchedToken.match.index! > 0) {
-                output.push(text.slice(i, i + matchedToken.match.index!))
+                const literal = remaining.slice(0, nextTokenStart)
+                parts.push(
+                    ctx.currentColor
+                        ? <span style={{ color: ctx.currentColor }}>{literal}</span>
+                        : literal
+                )
+                remaining = remaining.slice(literal.length)
             }
-
-            output.push(matchedToken.render(matchedToken.match))
-            i += matchedToken.match.index! + matchedToken.match[0].length
         }
 
-        return output
+        return parts
     }
 
     return <div>{parseBlocks()}</div>;
