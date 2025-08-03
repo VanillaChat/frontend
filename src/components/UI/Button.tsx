@@ -12,6 +12,7 @@ type Props = {
   style?: React.CSSProperties;
   to?: string;
   submit?: boolean;
+  className?: string;
 };
 
 export const buttonStyles = (props: Partial<Props>) => cn(
@@ -52,7 +53,7 @@ const Button: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
         //       filled: props.filled
         //     }
         // )}
-        className={buttonStyles(props)}
+        className={cn(buttonStyles(props), props.className)}
         style={{ textDecoration: "none", ...props.style }}
       >
         {props.icon && <img src={props.icon} alt="icon" className={cn(
@@ -74,7 +75,7 @@ const Button: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
           //       filled: props.filled
           //     }
           // )}
-          className={buttonStyles(props)}
+          className={cn(buttonStyles(props), props.className)}
           disabled={props.disabled}
         >
           {props.icon && <img src={props.icon} alt="icon" className={cn(
@@ -89,7 +90,7 @@ const Button: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
       <button
         style={props.style}
         onClick={props.disabled ? void(0) : props.onClick}
-        className={buttonStyles(props)}
+        className={cn(buttonStyles(props), props.className)}
         disabled={props.disabled}
         type="button"
       >

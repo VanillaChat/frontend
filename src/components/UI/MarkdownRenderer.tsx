@@ -213,7 +213,7 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
 
                 const literal = remaining.slice(0, nextMatchIndex)
                 const node = ctx.currentColor
-                    ? <span style={{ color: ctx.currentColor }}>{literal}</span>
+                    ? <span style={{ color: ctx.currentColor }} key={nanoid()}>{literal}</span>
                     : literal
 
                 parts.push(node)
@@ -226,7 +226,7 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
 
             return [
                 <span
-                    key="gradient"
+                    key={nanoid()}
                     style={{
                         backgroundImage: gradientStyle,
                         WebkitBackgroundClip: "text",
