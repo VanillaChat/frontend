@@ -8,6 +8,8 @@ import dayjs from "dayjs";
 import Avatar from "@/components/UI/Avatar";
 import logo from "@/icons/squarelogo.png";
 import {ServerMember} from "@/types/Server";
+import {buttonStyles} from "@/components/UI/Button";
+import {FaCopy} from "react-icons/fa";
 
 export type UserProfileProps = {
     children: (isActive: boolean) => ReactNode;
@@ -82,6 +84,15 @@ export default function UserProfile(props: UserProfileProps) {
                                     </div>
                                 )
                             }
+                            <div className="flex flex-col mt-[15px]">
+                                <h1 className="font-semibold text-[14px]">User ID</h1>
+                                <p className="text-[14px] items-center select-text flex flex-row gap-2">
+                                    {props.user.id}
+                                    <div className={cn(buttonStyles({filled: false}), 'p-1.5')} onClick={() => navigator.clipboard.writeText(props.user.id)}>
+                                        <FaCopy color="#F7E26B" size="16px" />
+                                    </div>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </Popover.Popup>

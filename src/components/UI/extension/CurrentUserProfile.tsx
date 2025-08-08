@@ -12,6 +12,8 @@ import {usePresence, UserStatus} from "@/store/presence";
 import {useSession} from "@/store/session";
 import {useMembers} from "@/store/servers";
 import logo from "@/icons/squarelogo.png";
+import {buttonStyles} from "@/components/UI/Button";
+import {FaCopy} from "react-icons/fa";
 
 export type UserProfileSmallProps = {
     children: ReactNode;
@@ -114,6 +116,15 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                                     </div>
                                 )
                             }
+                            <div className="flex flex-col mt-[15px]">
+                                <h1 className="font-semibold text-[14px]">User ID</h1>
+                                <p className="text-[14px] items-center select-text flex flex-row gap-2">
+                                    {props.user.id}
+                                    <div className={cn(buttonStyles({filled: false}), 'p-1.5')} onClick={() => navigator.clipboard.writeText(props.user.id)}>
+                                        <FaCopy color="#F7E26B" size="16px" />
+                                    </div>
+                                </p>
+                            </div>
                             <div className="flex flex-col gap-1 justify-end h-[100%] mb-4">
                                 <p className="font-medium">Status</p>
                                 <Select.Root items={statuses} value={props.user.status} onValueChange={(value) => {

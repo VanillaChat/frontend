@@ -1,9 +1,10 @@
 import {FC, JSX, ReactNode} from "react";
 import ShikiHighlighter from "react-shiki";
+import { bundledLanguages } from "shiki";
 import {useTheme} from "@/context/ThemeProvider";
 import {nanoid} from "nanoid";
 
-interface SimpleMarkdownProps {
+interface MarkdownRendererProps {
     children: string;
 }
 
@@ -13,7 +14,7 @@ type InlineContext = {
     gradientColors?: string[];
 }
 
-export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
+export const MarkdownRenderer: FC<MarkdownRendererProps> = ({ children }) => {
     const trimmed = children.replace(/^\n+|\n+$/g, "");
     const { theme } = useTheme();
 
@@ -35,7 +36,7 @@ export const MarkdownRenderer: FC<SimpleMarkdownProps> = ({ children }) => {
                 }
                 i++;
                 result.push(
-                    <ShikiHighlighter language={language} theme={theme === "light" ? "one-light" : "one-dark-pro"} className="!select-text" showLanguage={false} key={`code-block-${i}`}>
+                    <ShikiHighlighter language={Object.keys(bundledLanguages).includes(language) ? language : "plaintext"} theme={theme === "light" ? "one-light" : "one-dark-pro"} className="!select-text" showLanguage={false} key={`code-block-${i}`}>
                         {codeLines.join("\n")}
                     </ShikiHighlighter>
                 );
