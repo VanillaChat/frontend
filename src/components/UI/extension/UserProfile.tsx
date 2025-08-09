@@ -37,7 +37,10 @@ export default function UserProfile(props: UserProfileProps) {
                         <ArrowSvg />
                     </Popover.Arrow>
                     <div className="w-[100%] h-[500px] rounded-lg p-1">
-                        <div className="w-[100%] h-[130px] rounded-t-lg bg-[#363636]">
+                        <div
+                            className="w-[100%] h-[130px] rounded-t-lg bg-[#363636] bg-cover bg-no-repeat"
+                            style={{backgroundImage: props.user.banner ? `url(${import.meta.env.VITE_API_URL}/cdn/banners/${props.user.id}/${props.user.banner}.webp)` : "none"}}
+                        >
                             <div className="border-white bg-white dark:border-[#262622] dark:bg-[#262622] dim:border-black dim:bg-black border-[2px] translate-y-[80px] translate-x-[15px] w-fit rounded-[100%]">
                                 <Avatar
                                     width="80px"
@@ -88,9 +91,9 @@ export default function UserProfile(props: UserProfileProps) {
                                 <h1 className="font-semibold text-[14px]">User ID</h1>
                                 <p className="text-[14px] items-center select-text flex flex-row gap-2">
                                     {props.user.id}
-                                    <div className={cn(buttonStyles({filled: false}), 'p-1.5')} onClick={() => navigator.clipboard.writeText(props.user.id)}>
+                                    <span className={cn(buttonStyles({filled: false}), 'p-1.5')} onClick={() => navigator.clipboard.writeText(props.user.id)}>
                                         <FaCopy color="#F7E26B" size="16px" />
-                                    </div>
+                                    </span>
                                 </p>
                             </div>
                         </div>

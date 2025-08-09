@@ -9,6 +9,7 @@ export type  User = {
     nickname?: string;
     bio: string | null;
     avatar?: string | null;
+    banner?: string | null;
 };
 
 export type Account = {
