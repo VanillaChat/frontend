@@ -6,6 +6,7 @@ import {nanoid} from "nanoid";
 
 interface MarkdownRendererProps {
     children: string;
+    disabledFeatures?: string[];
 }
 
 type InlineContext = {
@@ -14,7 +15,7 @@ type InlineContext = {
     gradientColors?: string[];
 }
 
-export const MarkdownRenderer: FC<MarkdownRendererProps> = ({ children }) => {
+export const MarkdownRenderer: FC<MarkdownRendererProps> = ({ children, disabledFeatures }) => {
     const trimmed = children.replace(/^\n+|\n+$/g, "");
     const { theme } = useTheme();
 
@@ -26,7 +27,7 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({ children }) => {
         while (i < lines.length) {
             const line = lines[i];
 
-            if (line.startsWith("```")) {
+            if (line.startsWith("```") && !disabledFeatures?.includes('codeblock')) {
                 const language = line.slice(3).trim();
                 const codeLines: string[] = [];
                 i++;

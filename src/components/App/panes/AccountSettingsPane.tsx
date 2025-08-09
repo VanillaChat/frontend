@@ -34,6 +34,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
     const [showModal, setShowModal] = useState(false);
     const [username, setUsername] = useState('');
     const [tag, setTag] = useState('');
+    const [bio, setBio] = useState('');
     const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +43,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
     const openEditModal = () => {
         setUsername(session.currentUser?.username || '');
         setTag(session.currentUser?.tag || '');
+        setBio(session.currentUser?.bio || '');
         setPassword('');
         setShowModal(true);
     };
@@ -83,6 +85,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
             let body: any = {
                 username,
                 tag,
+                bio,
                 password
             };
 
@@ -206,10 +209,11 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                     {currentTab!.split('-').map(str => str[0].toUpperCase() + str.slice(1).toLowerCase()).join(' ')}
                 </h1>
                 {currentTab === 'overview' && (
-                    <div className="flex flex-col gap-6">
-                        <div className="flex flex-row gap-2 items-center mt-5">
+                    <div className="flex flex-col gap-2 mt-2">
+                        <p className="font-bold text-[20px]">Profile</p>
+                        <div className="flex flex-row gap-2 items-center">
                             <div className="relative group">
-                                <div className="relative w-[94px] h-[94px] rounded-[10px] overflow-hidden">
+                                <div className="relative w-[92px] h-[92px] rounded-[10px] overflow-hidden">
                                     <Avatar
                                         id={session.currentUser.id}
                                         avatar={session.currentUser.avatar}
@@ -266,7 +270,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                         onChange={handleBannerChange}
                                     />
                                     <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                                        <div className="flex flex-col text-white my-[4px]">
+                                        <div className="flex flex-col text-white my-[8px]">
                                             <span className="text-xl font-bold">
                                                 {session.currentUser.username}
                                             </span>
@@ -278,16 +282,30 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                 </div>
                             </div>
                         </div>
-                        <div className="flex flex-col gap-2">
-                            <p className="font-bold">Username</p>
+                        <div className="flex flex-col mt-4">
                             <div className="flex flex-row gap-2 justify-between items-center">
-                                <p>
-                                    {session.currentUser.username}
-                                    <span className="text-[20px] font-bold mx-1">/</span>
-                                    {session.currentUser.tag}
-                                </p>
+                                <div className="flex flex-col justify-center">
+                                    <p className="font-bold translate-y-[2px]">Username</p>
+                                    <p className="translate-y-[-2px]">
+                                        {session.currentUser.username}
+                                        <span className="text-[20px] font-bold mx-1">/</span>
+                                        {session.currentUser.tag}
+                                    </p>
+                                </div>
                                 <Button className="!h-fit flex-none" onClick={openEditModal} filled>Edit Profile</Button>
                             </div>
+                            {
+                                session.currentUser.bio && (
+                                    <div className="flex flex-row gap-2 justify-between items-center mt-2">
+                                        <div className="flex flex-col justify-center">
+                                            <p className="font-bold translate-y-[2px]">Bio</p>
+                                            <p className="translate-y-[-2px]">
+                                                {session.currentUser.bio}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )
+                            }
                             {/* Add more account settings here */}
                         </div>
                     </div>
@@ -305,7 +323,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                 title="Edit Profile"
                 onConfirm={handleSubmit}
                 confirmText="Save Changes"
-                confirmDisabled={isSubmitting || (!username.trim() || !tag.trim() || !password.trim()) || (`${username.trim()}/${tag.trim()}` === `${session.currentUser.username}/${session.currentUser.tag}`)}
+                confirmDisabled={isSubmitting || (!username.trim() || !tag.trim() || !password.trim()) || (`${username.trim()}/${tag.trim()}` === `${session.currentUser.username}/${session.currentUser.tag}` && bio === (session.currentUser.bio || ''))}
             >
                 <div className="flex flex-col gap-4 mt-4">
                     <div className="flex flex-row gap-2">
@@ -327,6 +345,19 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                 />
                             </div>
                         </div>
+                    </div>
+                    <div className="!mb-3 flex flex-col w-full gap-2">
+                        <Input
+                            type="text"
+                            placeholder="Enter your bio"
+                            textarea
+                            value={bio}
+                            onChange={(e) => setBio(e.target.value)}
+                            id="bio"
+                            label="Bio"
+                            maxLength={256}
+                        />
+                        <p className="self-end">{bio.length} / 256</p>
                     </div>
                     <div className="!mb-3">
                         <Input

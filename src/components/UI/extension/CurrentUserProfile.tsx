@@ -14,6 +14,7 @@ import {useMembers} from "@/store/servers";
 import logo from "@/icons/squarelogo.png";
 import {buttonStyles} from "@/components/UI/Button";
 import {FaCopy} from "react-icons/fa";
+import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
 
 export type UserProfileSmallProps = {
     children: ReactNode;
@@ -113,9 +114,9 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
                                 props.user.bio && (
                                     <div className="flex flex-col mt-[15px]">
                                         <h1 className="font-semibold text-[14px]">Bio</h1>
-                                        <p className="text-[14px] items-center">
-                                            {props.user.bio}
-                                        </p>
+                                            <MarkdownRenderer disabledFeatures={["codeblock"]}>
+                                                {props.user.bio}
+                                            </MarkdownRenderer>
                                     </div>
                                 )
                             }

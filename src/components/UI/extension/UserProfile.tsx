@@ -10,6 +10,7 @@ import logo from "@/icons/squarelogo.png";
 import {ServerMember} from "@/types/Server";
 import {buttonStyles} from "@/components/UI/Button";
 import {FaCopy} from "react-icons/fa";
+import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
 
 export type UserProfileProps = {
     children: (isActive: boolean) => ReactNode;
@@ -81,9 +82,9 @@ export default function UserProfile(props: UserProfileProps) {
                                 props.user.bio && (
                                     <div className="flex flex-col mt-[15px]">
                                         <h1 className="font-semibold text-[14px]">Bio</h1>
-                                        <p className="text-[14px] items-center">
+                                        <MarkdownRenderer disabledFeatures={["codeblock"]}>
                                             {props.user.bio}
-                                        </p>
+                                        </MarkdownRenderer>
                                     </div>
                                 )
                             }

@@ -19,6 +19,7 @@ type Props = {
     onKeyDown?: (e: React.KeyboardEvent) => void;
     name?: string;
     autoFocus?: boolean;
+    maxLength?: number;
 } & ({
      textarea: true;
      onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -87,6 +88,7 @@ const Input: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
                     onKeyDown={props.onKeyDown}
                     autoFocus={props.autoFocus}
                     rows={1}
+                    maxLength={props.maxLength}
                 />
             </div>
         )
@@ -166,6 +168,7 @@ const Input: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
                 name={props.name}
                 onKeyDown={props.onKeyDown}
                 autoFocus={props.autoFocus}
+                maxLength={props.maxLength}
             />
         </div>
     )
