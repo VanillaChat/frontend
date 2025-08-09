@@ -10,6 +10,7 @@ import Input from "@/components/UI/Input";
 import Modal from "@/components/UI/Modal";
 import Button from "@/components/UI/Button";
 import {useMembers} from "@/store/servers";
+import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
 
 const updateUserInAllGuilds = (updatedUser: User, members: ReturnType<typeof useMembers.getState>, currentUserId: string) => {
     Object.entries(members.data).forEach(([guildId, guildMembers]) => {
@@ -299,9 +300,11 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                     <div className="flex flex-row gap-2 justify-between items-center mt-2">
                                         <div className="flex flex-col justify-center">
                                             <p className="font-bold translate-y-[2px]">Bio</p>
-                                            <p className="translate-y-[-2px]">
-                                                {session.currentUser.bio}
-                                            </p>
+                                            <div className="translate-y-[-2px]">
+                                                <MarkdownRenderer disabledFeatures={["codeblock"]}>
+                                                    {session.currentUser.bio}
+                                                </MarkdownRenderer>
+                                            </div>
                                         </div>
                                     </div>
                                 )
@@ -346,7 +349,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                             </div>
                         </div>
                     </div>
-                    <div className="!mb-3 flex flex-col w-full gap-2">
+                    <div className="!mb-1 flex flex-col w-full gap-2">
                         <Input
                             type="text"
                             placeholder="Enter your bio"
