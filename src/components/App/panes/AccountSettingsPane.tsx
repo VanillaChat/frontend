@@ -218,8 +218,6 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
             } else {
                 session.setSettings({ theme: newTheme });
             }
-
-            console.log(theme, newTheme, session.settings)
         } catch (error) {
             console.error('Error updating theme:', error);
         }
