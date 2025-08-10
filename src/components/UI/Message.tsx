@@ -143,18 +143,27 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                             <span className="text-xs opacity-50 text-right w-[40px] flex-shrink-0 pt-1.5">
                                 {dayjs(props.createdAt).format('HH:mm')}
                             </span>
-                            
-                            {/* Avatar in compact mode */}
+
                             {settings.compactShowAvatars && (
-                                <div className="flex-shrink-0 mr-1">
-                                    <Avatar
-                                        width="20px"
-                                        height="20px"
-                                        id={props.author.id!}
-                                        avatar={props.author.avatar}
-                                        className="rounded-full"
-                                    />
-                                </div>
+                                <UserProfile user={{
+                                    ...props.author as User,
+                                    status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
+                                }} side="right">
+                                    {(isActive) => {
+                                        useEffect(() => {
+                                            props.setIsProfileOpen(isActive);
+                                        }, [isActive]);
+                                        return <div className="flex-shrink-0 mr-1">
+                                            <Avatar
+                                                width="20px"
+                                                height="20px"
+                                                id={props.author.id!}
+                                                avatar={props.author.avatar}
+                                                className="rounded-full"
+                                            />
+                                        </div>
+                                    }}
+                                </UserProfile>
                             )}
                             
                             <div className="min-w-0">
@@ -162,14 +171,17 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                                     ...props.author as User,
                                     status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
                                 }} side="right">
-                                    {(isActive) => (
-                                        <span className={cn(
+                                    {(isActive) => {
+                                        useEffect(() => {
+                                            props.setIsProfileOpen(isActive);
+                                        }, [isActive]);
+                                        return <span className={cn(
                                             "font-medium cursor-pointer hover:underline whitespace-nowrap leading-tight",
                                             {"underline": isActive}
                                         )}>
                                             {(props.author.nickname ?? props.author.username) || "Unknown User"}
                                         </span>
-                                    )}
+                                    }}
                                 </UserProfile>
                             </div>
                             <div className="min-w-0">
@@ -268,7 +280,7 @@ export default function Message(props: MessageProps) {
         previous.author.id === props.author.id &&
         dayjs(props.createdAt).diff(previous.createdAt, 'minutes') < 5
     );
-    
+
     const editCache = useEditCache();
     const session = useSession();
     const ref = useRef<HTMLDivElement>(null);
