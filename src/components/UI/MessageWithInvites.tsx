@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { processMessageContent } from "@/utils/inviteUtils";
-import { useInvites, InviteData } from "@/store/invites";
-import { useServers } from "@/store/servers";
+import React, {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {processMessageContent} from "@/utils/inviteUtils";
+import {InviteData, useInvites} from "@/store/invites";
+import {useServers} from "@/store/servers";
 import InviteEmbed from "@/components/UI/InviteEmbed";
-import { MarkdownRenderer } from "@/components/UI/MarkdownRenderer";
-import { FaExclamationCircle } from "react-icons/fa";
+import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
+import {FaExclamationCircle} from "react-icons/fa";
 
 interface MessageWithInvitesProps {
   content: string;
@@ -27,7 +27,6 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
     setInviteCodes(inviteCodes);
   }, [content]);
 
-  // Memoize the checkMembershipStatus function to avoid unnecessary re-renders
   const checkMembershipStatus = React.useCallback((guildId: string): boolean => {
     return servers.data.some(server => server.id === guildId);
   }, [servers.data]);
@@ -39,28 +38,23 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
       const memberStatusMap: Record<string, boolean> = {};
       
       for (const code of inviteCodes) {
-        // Check for fetch errors
         if (invites.hasFetchError(code)) {
           fetchErrorsMap[code] = true;
           continue;
         }
 
-        // Check for cached membership status
         if (invites.hasMembershipStatus(code)) {
           memberStatusMap[code] = invites.getMembershipStatus(code) || false;
         }
 
-        // Get or fetch invite data
         let inviteData: InviteData | null = null;
         
         if (invites.hasInvite(code)) {
-          // Use cached invite data
           inviteData = invites.getInvite(code)!;
           if (inviteData) {
             inviteDataMap[code] = inviteData;
           }
         } else {
-          // Fetch invite data
           inviteData = await invites.fetchInvite(code);
           if (inviteData) {
             inviteDataMap[code] = inviteData;
@@ -69,19 +63,14 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
             continue;
           }
         }
-        
-        // Check membership status if we have invite data but no cached status
+
         if (inviteData && !invites.hasMembershipStatus(code)) {
           const isMember = checkMembershipStatus(inviteData.guildId);
           memberStatusMap[code] = isMember;
-          
-          // Store membership status in the invites store
-          // This won't trigger a re-render of this effect because we're not watching invites state
           invites.setMembershipStatus(code, isMember);
         }
       }
-      
-      // Update local state all at once to minimize re-renders
+
       setInviteData(inviteDataMap);
       setFetchErrors(fetchErrorsMap);
       setMemberStatus(memberStatusMap);
@@ -90,43 +79,33 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
     if (inviteCodes.length > 0) {
       fetchInvites();
     }
-  }, [inviteCodes, checkMembershipStatus]); // Include checkMembershipStatus to ensure it runs when servers.data changes
-  
-  // This effect runs when servers data changes to update membership status
+  }, [inviteCodes, checkMembershipStatus]);
+
   useEffect(() => {
-    // Only run if servers data is loaded
     if (servers.data.length > 0) {
-      // Retry any failed invite fetches when servers are loaded
-      // This is safe because we're not watching invites state
       invites.retryFailedInvites();
-      
-      // Only check membership status if we have invite data
+
       if (Object.keys(inviteData).length > 0) {
-        // Create a copy of the current membership status
         const updatedMemberStatus = { ...memberStatus };
         let hasChanges = false;
-        
-        // Check each invite's membership status
+
         for (const code in inviteData) {
           const invite = inviteData[code];
           const isMember = checkMembershipStatus(invite.guildId);
-          
-          // Only update if the status has changed
+
           if (memberStatus[code] !== isMember) {
             updatedMemberStatus[code] = isMember;
-            // Update the invites store (won't trigger this effect)
             invites.setMembershipStatus(code, isMember);
             hasChanges = true;
           }
         }
-        
-        // Only update state if there are changes to avoid unnecessary re-renders
+
         if (hasChanges) {
           setMemberStatus(updatedMemberStatus);
         }
       }
     }
-  }, [servers.data, checkMembershipStatus]); // Only depend on servers.data and checkMembershipStatus to prevent circular updates
+  }, [servers.data, checkMembershipStatus]);
 
   const handleJoinServer = async (code: string) => {
     const invite = inviteData[code];
@@ -141,7 +120,6 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
       }
     }
 
-    // Use the memoized checkMembershipStatus function
     const isMember = checkMembershipStatus(invite.guildId);
     
     if (isMember) {
@@ -194,7 +172,7 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
   };
 
   return (
-    <div>
+    <>
       <MarkdownRenderer>{processedContent}</MarkdownRenderer>
       
       {inviteCodes.map((code) => {
@@ -216,7 +194,7 @@ const MessageWithInvites: React.FC<MessageWithInvitesProps> = ({ content }) => {
 
         return null;
       })}
-    </div>
+    </>
   );
 };
 

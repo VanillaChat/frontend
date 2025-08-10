@@ -67,7 +67,6 @@ const Input: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
                     value={props.value}
                     onChange={(e) => {
                         if (props.onChange) props.onChange(e);
-                        // Auto-adjust height
                         const textarea = e.target;
                         textarea.style.height = 'auto';
                         textarea.style.height = `${textarea.scrollHeight}px`;

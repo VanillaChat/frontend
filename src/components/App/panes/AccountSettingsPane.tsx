@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useMemo, useRef, useState} from "react";
 import FullScreen from "@/components/UI/FullScreen";
 import {Tab} from "./Tab";
 import {FaCog, FaPencilAlt} from "react-icons/fa";
@@ -15,7 +15,14 @@ import {Theme, useTheme} from "@/context/ThemeProvider";
 import LightThemePreview from "@/icons/images/light-theme-preview.svg";
 import DarkThemePreview from "@/icons/images/dark-theme-preview.svg";
 import DimThemePreview from "@/icons/images/dim-theme-preview.svg";
+import CompactModeOffLight from "@/icons/images/compact-mode-off-light.svg";
+import CompactModeOffDark from "@/icons/images/compact-mode-off-dark.svg";
+import CompactModeOffDim from "@/icons/images/compact-mode-off-dim.svg";
+import CompactModeOnLight from "@/icons/images/compact-mode-on-light.svg";
+import CompactModeOnDark from "@/icons/images/compact-mode-on-dark.svg";
+import CompactModeOnDim from "@/icons/images/compact-mode-on-dim.svg";
 import cn from "@/utils/cn";
+import {Checkbox} from "@base-ui-components/react/checkbox";
 
 const updateUserInAllGuilds = (updatedUser: User, members: ReturnType<typeof useMembers.getState>, currentUserId: string) => {
     Object.entries(members.data).forEach(([guildId, guildMembers]) => {
@@ -42,6 +49,8 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
     const [tag, setTag] = useState('');
     const [bio, setBio] = useState('');
     const [password, setPassword] = useState('');
+    const [compactMode, setCompactMode] = useState(session.settings.compactMode);
+    const [compactShowAvatars, setCompactShowAvatars] = useState(session.settings.compactShowAvatars);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -223,6 +232,72 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
         }
     }
 
+    const updateCompactMode = async (newCompact: boolean, newShowAvatars: boolean) => {
+        const previousCompact = compactMode;
+        const previousShowAvatars = compactShowAvatars;
+
+        setCompactMode(newCompact);
+        setCompactShowAvatars(newShowAvatars);
+
+        if (session.settings.compactMode === newCompact && 
+            session.settings.compactShowAvatars === newShowAvatars) {
+            return;
+        }
+
+        const updates: any = {};
+        if (newCompact !== session.settings.compactMode) updates.compactMode = newCompact;
+        if (newShowAvatars !== session.settings.compactShowAvatars) updates.compactShowAvatars = newShowAvatars;
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me/user-settings`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(updates)
+            });
+
+            if (res.status !== 204) {
+                setCompactMode(previousCompact);
+                setCompactShowAvatars(previousShowAvatars);
+                throw new Error('Failed to update settings');
+            }
+
+            session.setSettings({
+                ...session.settings,
+                ...updates
+            });
+            
+        } catch (error) {
+            console.error('Error updating compact mode settings:', error);
+            setCompactMode(previousCompact);
+            setCompactShowAvatars(previousShowAvatars);
+        }
+    }
+
+    const currentNonCompactModeImage = useMemo(() => {
+        switch (theme) {
+            case 'light':
+                return CompactModeOffLight;
+            case 'dark':
+                return CompactModeOffDark;
+            case 'dim':
+                return CompactModeOffDim;
+            default:
+        }
+    }, [theme]);
+
+    const currentCompactModeImage = useMemo(() => {
+        switch (theme) {
+            case 'light':
+                return CompactModeOnLight;
+            case 'dark':
+                return CompactModeOnDark;
+            case 'dim':
+                return CompactModeOnDim;
+            default:
+        }
+    }, [theme]);
+
     if (!session.currentUser || !session.currentAccount) return null;
 
     return (
@@ -353,7 +428,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                     src={LightThemePreview}
                                     className={
                                         cn(
-                                            "rounded-[8px] cursor-pointer border-4 border-transparent p-0.5",
+                                            "rounded-[8px] cursor-pointer border-4 dark:border-2 dim:border-2 border-transparent p-0.5 hover:border-[#f7e26c]",
                                             {
                                                 "border-[#f7e26c]": theme === "light"
                                             }
@@ -370,7 +445,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                     src={DarkThemePreview}
                                     className={
                                         cn(
-                                            "rounded-[8px] cursor-pointer border-2 border-transparent p-0.5",
+                                            "rounded-[8px] cursor-pointer border-4 dark:border-2 dim:border-2 border-transparent p-0.5 hover:border-[#f7e26c]",
                                             {
                                                 "border-[#f7e26c]": theme === "dark"
                                             }
@@ -387,7 +462,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                     src={DimThemePreview}
                                     className={
                                         cn(
-                                            "rounded-[8px] cursor-pointer border-2 border-transparent p-0.5",
+                                            "rounded-[8px] cursor-pointer border-4 dark:border-2 dim:border-2 border-transparent p-0.5 hover:border-[#f7e26c]",
                                             {
                                                 "border-[#f7e26c]": theme === "dim"
                                             }
@@ -400,6 +475,78 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                 <p className="font-bold">Dim</p>
                             </div>
                         </div>
+                        <p className="mt-4">Compact Mode</p>
+                        <div className="flex flex-row gap-2 mt-2">
+                            <div className="flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={async () => await updateCompactMode(false, session.settings.compactShowAvatars)}>
+                                <img
+                                    src={currentNonCompactModeImage}
+                                    className={
+                                        cn(
+                                            "rounded-[8px] cursor-pointer border-4 dark:border-2 dim:border-2 border-transparent p-0.5 hover:border-[#f7e26c]",
+                                            {
+                                                "border-[#f7e26c]": !compactMode
+                                            }
+                                        )
+                                    }
+                                    alt="compact-mode-off"
+                                    width={256}
+                                    height={128}
+                                />
+                                <p className="font-bold">Off</p>
+                            </div>
+                            <div className="flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={async () => await updateCompactMode(true, session.settings.compactShowAvatars)}>
+                                <img
+                                    src={currentCompactModeImage}
+                                    className={
+                                        cn(
+                                            "rounded-[8px] cursor-pointer border-4 dark:border-2 dim:border-2 border-transparent p-0.5 hover:border-[#f7e26c]",
+                                            {
+                                                "border-[#f7e26c]": compactMode
+                                            }
+                                        )
+                                    }
+                                    alt="compact-mode-on"
+                                    width={256}
+                                    height={128}
+                                />
+                                <p className="font-bold">On</p>
+                            </div>
+                        </div>
+                        <label className="flex items-center gap-2 text-base text-gray-900 dark:text-gray-100 dim:text-gray-200 mt-4">
+                            <Checkbox.Root
+                                checked={compactShowAvatars}
+                                onCheckedChange={(checked) => updateCompactMode(session.settings.compactMode, checked as boolean)}
+                                className={cn(
+                                    "group relative flex size-5 items-center justify-center rounded border-2 transition-colors cursor-pointer",
+                                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+                                    "border-gray-300 dark:border-gray-500 dim:border-gray-600",
+                                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                                    {
+                                        "bg-[#f7e26c] border-[#f7e26c] border-none": compactShowAvatars,
+                                        "hover:border-gray-400 dark:hover:border-gray-400 dim:hover:border-gray-500": !compactShowAvatars
+                                    }
+                                )}
+                                disabled={!compactMode}
+                            >
+                                <Checkbox.Indicator>
+                                    <div className={cn(
+                                        "absolute inset-0 flex items-center justify-center rounded-sm transition-colors",
+                                        {
+                                            "bg-[#f7e26c]": compactShowAvatars,
+                                            "group-hover:bg-gray-200 dark:group-hover:bg-gray-600 dim:group-hover:bg-gray-700": !compactShowAvatars
+                                        }
+                                    )}>
+                                        <CheckIcon className={cn("size-3.5 transition-opacity", {
+                                            "text-gray-900 dark:text-gray-900 dim:text-gray-900": compactShowAvatars,
+                                            "text-gray-400 opacity-0 group-hover:opacity-100 dark:group-hover:text-gray-300 dim:group-hover:text-gray-300": !compactShowAvatars
+                                        })} />
+                                    </div>
+                                </Checkbox.Indicator>
+                            </Checkbox.Root>
+                            <span className={cn("text-sm font-medium", !session.settings.compactMode && "opacity-50")}>
+                                Show avatars
+                            </span>
+                        </label>
                     </div>
                 )}
             </div>
@@ -461,3 +608,11 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
         </FullScreen>
     );
 };
+
+function CheckIcon(props: React.ComponentProps<'svg'>) {
+    return (
+        <svg fill="currentcolor" width="10" height="10" viewBox="0 0 10 10" {...props}>
+            <path d="M9.1603 1.12218C9.50684 1.34873 9.60427 1.81354 9.37792 2.16038L5.13603 8.66012C5.01614 8.8438 4.82192 8.96576 4.60451 8.99384C4.3871 9.02194 4.1683 8.95335 4.00574 8.80615L1.24664 6.30769C0.939709 6.02975 0.916013 5.55541 1.19372 5.24822C1.47142 4.94102 1.94536 4.91731 2.2523 5.19524L4.36085 7.10461L8.12299 1.33999C8.34934 0.993152 8.81376 0.895638 9.1603 1.12218Z" />
+        </svg>
+    );
+}

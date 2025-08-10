@@ -1,6 +1,6 @@
 import {FC, JSX, ReactNode} from "react";
 import ShikiHighlighter from "react-shiki";
-import { bundledLanguages } from "shiki";
+import {bundledLanguages} from "shiki";
 import {useTheme} from "@/context/ThemeProvider";
 import {nanoid} from "nanoid";
 
@@ -244,5 +244,5 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({ children, disabled
         return parts
     }
 
-    return <div>{parseBlocks()}</div>;
+    return <>{parseBlocks()}</>;
 };

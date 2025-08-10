@@ -8,6 +8,8 @@ export type SessionState = {
     currentUser: User | null;
     settings: {
       theme: Theme;
+      compactMode: boolean;
+      compactShowAvatars: boolean
     };
     login: (data: Omit<SessionState, 'login' | 'logout' | 'updateCurrentUser' | 'setSettings'>) => void;
     logout: () => void;
@@ -30,7 +32,9 @@ export const useSession = create<SessionState>()(devtools((set) => ({
         currentAccount: null,
         currentUser: null,
         settings: {
-            theme: "light"
+            theme: "light",
+            compactMode: false,
+            compactShowAvatars: false
         }
     })),
     setSettings: (data: Partial<SessionState['settings']>) => set((state) => ({

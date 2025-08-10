@@ -1,5 +1,5 @@
-import { create } from "zustand/react";
-import { devtools } from "zustand/middleware";
+import {create} from "zustand/react";
+import {devtools} from "zustand/middleware";
 
 export type InviteData = {
   type: number;
@@ -122,8 +122,6 @@ export const useInvites = create<InvitesState>()(
         clearTimeout(timeoutId);
         
         if (!response.ok) {
-          // Always mark as not loading, but only mark as error in non-production
-          // or if explicitly told to mark errors (will be handled by component)
           if (!import.meta.env.PROD) {
             set((state) => ({
               isLoading: { ...state.isLoading, [code]: false },
@@ -144,9 +142,7 @@ export const useInvites = create<InvitesState>()(
         return data;
       } catch (error) {
         console.error("Failed to fetch invite:", error);
-        
-        // Always mark as not loading, but only mark as error in non-production
-        // or if explicitly told to mark errors (will be handled by component)
+
         if (!import.meta.env.PROD) {
           set((state) => ({
             isLoading: { ...state.isLoading, [code]: false },

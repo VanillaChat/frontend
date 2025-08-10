@@ -50,6 +50,7 @@ const baseMessageStyle = (props: MessageProps, isCompact: boolean, editCache: Re
 
 
 function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolean; messageRef?: React.RefObject<HTMLDivElement | null> | React.RefObject<HTMLLIElement | null>; }) {
+    const { settings } = useSession();
     const editCache = useEditCache();
     const messages = useMessages();
     const { channelId } = useParams();
@@ -82,101 +83,170 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
 
     const Element: React.ElementType = props.isBare ? "li" : "div";
 
-    return <Element
-        className={cn(
-            "w-[100%]",
-            {
-                [baseMessageStyle(props, props.isCompact, editCache)]: props.isBare
-            }
-        )}
-        // @ts-expect-error
-        ref={props.messageRef}
-        data-message-id={props.id}
-    >
-        <div className="grid grid-cols-[42px_1fr] items-start gap-[8px] w-[100%]">
-            <div className="flex justify-start items-start">
-                {!props.isCompact ? (
-                    <UserProfile user={{
-                        ...props.author as User,
-                        status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
-                    }} side="right">
-                        {
-                            (isActive) => {
-                                useEffect(() => {
-                                    props.setIsProfileOpen(isActive);
-                                }, [isActive]);
-                                return <Avatar
-                                    width="42px"
-                                    height="auto"
-                                    id={props.author.id!}
-                                    avatar={props.author.avatar}
-                                    className={cn(
-                                        "mr-[8px] mt-0.5",
-                                        {
-                                            "[data-parent]:overflow-hidden": isActive
-                                        }
-                                    )}
-                                />
-                            }
-                        }
-                    </UserProfile>
-                ) : (
-                    <div className="w-[42px] h-auto min-h-[1em] opacity-0"></div>
-                )}
-            </div>
-            
-            <div className="flex flex-col justify-start items-start max-w-[100%] w-[100%]">
-                    {!props.isCompact &&
-                        <div>
-                            <UserProfile user={{
-                                ...props.author as User,
-                                status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
-                            }} side="right">
-                                {
-                                    (isActive) => {
-                                        useEffect(() => {
-                                            props.setIsProfileOpen(isActive);
-                                        }, [isActive]);
-                                        return <span className={cn(
-                                            "font-medium cursor-pointer hover:underline",
-                                            {
-                                                "underline": isActive
-                                            }
-                                        )}>{(props.author.nickname ?? props.author.username) || "Unknown User"}</span>
-                                    }
-                                }
-                            </UserProfile>
-                            <span className="text-[12px] ml-[5px] dark:text-[#C2C2C2] dim:text-[#C2C2C2]">
-                    {formatDate(props.createdAt)}
-                  </span>
-                        </div>
+    return (
+        <Element
+            className={cn(
+                "w-[100%]",
+                {
+                    [baseMessageStyle(props, props.isCompact, editCache)]: props.isBare
+                }
+            )}
+            // @ts-expect-error
+            ref={props.messageRef}
+            data-message-id={props.id}
+        >
+            <div className={cn({
+                "grid grid-cols-[42px_1fr] gap-[8px] items-start w-[100%]": !settings.compactMode,
+                "flex items-start w-[100%] -ml-2": settings.compactMode
+            })}>
+                <div className={cn(
+                    "flex justify-start items-start",
+                    {
+                        "w-0": settings.compactMode
                     }
-                {
-                    (!editCache.cache.isEditing || editCache.cache.messageId !== props.id) &&
-                    <div className="flex flex-col gap-1">
-                        <MessageWithInvites content={props.content} />
-                        {props.updatedAt && <small className="opacity-45 text-[12px]">(edited)</small>}
-                    </div>
-                }
-                {
-                    editCache.cache.isEditing &&
-                    editCache.cache.messageId === props.id &&
-                    <div className="w-[100%] flex flex-col gap-1">
-                        <Input
-                            containerClass="flex mb-[10px] w-[98%] text-center justify-self-center self-center mt-auto"
-                            className="shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
-                            textarea
-                            id="text-input"
-                            value={editCache.cache.content || ''}
-                            onChange={(e) => editCache.setContent(e.target.value)}
-                            onKeyDown={onUpdateMessage}
-                            innerRef={textareaRef}
-                        />
-                        <small className="font-semibold flex flex-row">
-                            escape to&nbsp;<p className="cursor-pointer" onClick={() => editCache.clear()}>cancel</p>, enter to save
-                        </small>
-                    </div>
-                }
+                )}>
+                    {!props.isCompact ? (
+                        <UserProfile user={{
+                            ...props.author as User,
+                            status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
+                        }} side="right">
+                            {
+                                (isActive) => {
+                                    useEffect(() => {
+                                        props.setIsProfileOpen(isActive);
+                                    }, [isActive]);
+                                    return <Avatar
+                                        width="42px"
+                                        height="auto"
+                                        id={props.author.id!}
+                                        avatar={props.author.avatar}
+                                        className={cn(
+                                            "mr-[8px] mt-0.5 transition-opacity",
+                                            {
+                                                "[data-parent]:overflow-hidden": isActive,
+                                                "opacity-0": settings.compactMode && !settings.compactShowAvatars,
+                                                "opacity-100": !settings.compactMode || settings.compactShowAvatars
+                                            }
+                                        )}
+                                    />
+                                }
+                            }
+                        </UserProfile>
+                    ) : (
+                        <div className="w-[42px] h-auto min-h-[1em] opacity-0"></div>
+                    )}
+                </div>
+
+                <div className="w-full">
+                    {settings.compactMode ? (
+                        <div className="flex items-start w-full gap-1">
+                            <span className="text-xs opacity-50 text-right w-[40px] flex-shrink-0 pt-1.5">
+                                {dayjs(props.createdAt).format('HH:mm')}
+                            </span>
+                            
+                            {/* Avatar in compact mode */}
+                            {settings.compactShowAvatars && (
+                                <div className="flex-shrink-0 mr-1">
+                                    <Avatar
+                                        width="20px"
+                                        height="20px"
+                                        id={props.author.id!}
+                                        avatar={props.author.avatar}
+                                        className="rounded-full"
+                                    />
+                                </div>
+                            )}
+                            
+                            <div className="min-w-0">
+                                <UserProfile user={{
+                                    ...props.author as User,
+                                    status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
+                                }} side="right">
+                                    {(isActive) => (
+                                        <span className={cn(
+                                            "font-medium cursor-pointer hover:underline whitespace-nowrap leading-tight",
+                                            {"underline": isActive}
+                                        )}>
+                                            {(props.author.nickname ?? props.author.username) || "Unknown User"}
+                                        </span>
+                                    )}
+                                </UserProfile>
+                            </div>
+                            <div className="min-w-0">
+                                {(!editCache.cache.isEditing || editCache.cache.messageId !== props.id) ? (
+                                    <MessageWithInvites content={props.content} />
+                                ) : (
+                                    <div className="w-[100%] flex flex-col gap-1">
+                                        <Input
+                                            containerClass="flex mb-[10px] w-[98%] text-center justify-self-center self-center mt-auto"
+                                            className="shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
+                                            textarea
+                                            id="text-input"
+                                            value={editCache.cache.content || ''}
+                                            onChange={(e) => editCache.setContent(e.target.value)}
+                                            onKeyDown={onUpdateMessage}
+                                            innerRef={textareaRef}
+                                        />
+                                        <small className="font-semibold flex flex-row">
+                                            escape to&nbsp;<p className="cursor-pointer" onClick={() => editCache.clear()}>cancel</p>, enter to save
+                                        </small>
+                                    </div>
+                                )}
+                                {props.updatedAt && <small className="opacity-45 text-[12px]">(edited)</small>}
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {!props.isCompact && (
+                                <div className="flex items-center gap-1 w-full">
+                                    <UserProfile user={{
+                                        ...props.author as User,
+                                        status: isOnline(props.author.id!) ? props.author.status! : "UNAVAILABLE"
+                                    }} side="right">
+                                        {(isActive) => {
+                                            useEffect(() => {
+                                                props.setIsProfileOpen(isActive);
+                                            }, [isActive]);
+                                            return (
+                                                <span className={cn(
+                                                    "font-medium cursor-pointer hover:underline",
+                                                    {"underline": isActive}
+                                                )}>
+                                                {(props.author.nickname ?? props.author.username) || "Unknown User"}
+                                            </span>
+                                            );
+                                        }}
+                                    </UserProfile>
+                                    <span className="text-[12px] dark:text-[#C2C2C2] dim:text-[#C2C2C2]">
+                                    {formatDate(props.createdAt)}
+                                </span>
+                                </div>
+                            )}
+                            <div className="flex flex-col gap-1">
+                                {(!editCache.cache.isEditing || editCache.cache.messageId !== props.id) ? (
+                                    <MessageWithInvites content={props.content} />
+                                ) : (
+                                    <div className="w-[100%] flex flex-col gap-1">
+                                        <Input
+                                            containerClass="flex mb-[10px] w-[98%] text-center justify-self-center self-center mt-auto"
+                                            className="shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
+                                            textarea
+                                            id="text-input"
+                                            value={editCache.cache.content || ''}
+                                            onChange={(e) => editCache.setContent(e.target.value)}
+                                            onKeyDown={onUpdateMessage}
+                                            innerRef={textareaRef}
+                                        />
+                                        <small className="font-semibold flex flex-row">
+                                            escape to&nbsp;<p className="cursor-pointer" onClick={() => editCache.clear()}>cancel</p>, enter to save
+                                        </small>
+                                    </div>
+                                )}
+                                {props.updatedAt && <small className="opacity-45 text-[12px]">(edited)</small>}
+                            </div>
+                        </>
+                    )}
+                </div>
                 {props.state === 'FAILED' && (
                     <div className="flex flex-row gap-[6px] mt-[6px] items-center">
                         <FaExclamationCircle color="#EF4444" size="14px" />
@@ -184,18 +254,20 @@ function BaseMessage(props: MessageProps & { isCompact: boolean; isBare?: boolea
                     </div>
                 )}
             </div>
-        </div>
-    </Element>
+        </Element>
+    )
 }
 
 export default function Message(props: MessageProps) {
     const messages = useMessages();
+    const { settings } = useSession();
     const previous = messages.data[props.channelId]?.[props.index - 1];
-    const isCompact = (
+
+    const isCompact = settings.compactMode || (
         previous &&
         previous.author.id === props.author.id &&
         dayjs(props.createdAt).diff(previous.createdAt, 'minutes') < 5
-    ) || false;
+    );
     
     const editCache = useEditCache();
     const session = useSession();
