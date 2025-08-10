@@ -198,25 +198,23 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
         }
     };
 
-    const updateTheme = async (newTheme: Theme) => {
-        if (newTheme === theme) return;
-
+    const updateTheme = async (theme: Theme) => {
         try {
-            setTheme(newTheme);
+            setTheme(theme);
 
             const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me/user-settings`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
-                    theme: newTheme.toUpperCase()
+                    theme: theme.toUpperCase()
                 })
             });
 
             if (res.status !== 200) {
                 setTheme(session.settings.theme);
             } else {
-                session.setSettings({ theme: newTheme });
+                session.setSettings({ theme });
             }
         } catch (error) {
             console.error('Error updating theme:', error);
