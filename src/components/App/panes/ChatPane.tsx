@@ -233,7 +233,8 @@ const ChatPane: React.FC = () => {
           updatedAt: null,
           author: {
             id: session.currentUser!.id,
-            username: session.currentUser!.username
+            username: session.currentUser!.username,
+            avatar: session.currentUser!.avatar
           },
           type: 'DEFAULT'
         });
