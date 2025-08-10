@@ -11,7 +11,8 @@ export default function onReady(ws: ReconnectingWebSocket, data: Payload) {
     console.log(`[WS] Ready.`);
     useSession.getState().login({
         currentUser: data.d.user,
-        currentAccount: data.d.account
+        currentAccount: data.d.account,
+        settings: data.d.settings
     });
     localStorage.setItem('theme', data.d.settings.theme.toLowerCase());
     document.querySelector('html')?.classList.remove('dark', 'dim');

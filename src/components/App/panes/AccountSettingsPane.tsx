@@ -11,6 +11,11 @@ import Modal from "@/components/UI/Modal";
 import Button from "@/components/UI/Button";
 import {useMembers} from "@/store/servers";
 import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
+import {Theme, useTheme} from "@/context/ThemeProvider";
+import LightThemePreview from "@/icons/images/light-theme-preview.svg";
+import DarkThemePreview from "@/icons/images/dark-theme-preview.svg";
+import DimThemePreview from "@/icons/images/dim-theme-preview.svg";
+import cn from "@/utils/cn";
 
 const updateUserInAllGuilds = (updatedUser: User, members: ReturnType<typeof useMembers.getState>, currentUserId: string) => {
     Object.entries(members.data).forEach(([guildId, guildMembers]) => {
@@ -40,6 +45,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
     const [isSubmitting, setIsSubmitting] = useState(false);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
+    const { theme, setTheme } = useTheme();
 
     const openEditModal = () => {
         setUsername(session.currentUser?.username || '');
@@ -192,6 +198,29 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
         }
     };
 
+    const updateTheme = async (theme: Theme) => {
+        try {
+            setTheme(theme);
+
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me/user-settings`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    theme: theme.toUpperCase()
+                })
+            });
+
+            if (res.status !== 200) {
+                setTheme(session.settings.theme);
+            } else {
+                session.setSettings({ theme });
+            }
+        } catch (error) {
+            console.error('Error updating theme:', error);
+        }
+    }
+
     if (!session.currentUser || !session.currentAccount) return null;
 
     return (
@@ -314,8 +343,61 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                     </div>
                 )}
                 {currentTab === 'appearance' && (
-                    <div>
-                        {/* Appearance settings will go here */}
+                    <div className="flex flex-col justify-center">
+                        <p>Theme</p>
+                        <div className="flex flex-row gap-2 mt-2">
+                            <div className="flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={async () => await updateTheme("light")}>
+                                <img
+                                    src={LightThemePreview}
+                                    className={
+                                        cn(
+                                            "rounded-[8px] cursor-pointer border-4 border-transparent p-0.5",
+                                            {
+                                                "border-[#f7e26c]": theme === "light"
+                                            }
+                                        )
+                                    }
+                                    alt="light-theme"
+                                    width={256}
+                                    height={128}
+                                />
+                                <p className="font-bold">Light</p>
+                            </div>
+                            <div className="flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={async () => await updateTheme("dark")}>
+                                <img
+                                    src={DarkThemePreview}
+                                    className={
+                                        cn(
+                                            "rounded-[8px] cursor-pointer border-2 border-transparent p-0.5",
+                                            {
+                                                "border-[#f7e26c]": theme === "dark"
+                                            }
+                                        )
+                                    }
+                                    alt="dark-theme"
+                                    width={256}
+                                    height={128}
+                                />
+                                <p className="font-bold">Dark</p>
+                            </div>
+                            <div className="flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={async () => await updateTheme("dim")}>
+                                <img
+                                    src={DimThemePreview}
+                                    className={
+                                        cn(
+                                            "rounded-[8px] cursor-pointer border-2 border-transparent p-0.5",
+                                            {
+                                                "border-[#f7e26c]": theme === "dim"
+                                            }
+                                        )
+                                    }
+                                    alt="light-theme"
+                                    width={256}
+                                    height={128}
+                                />
+                                <p className="font-bold">Dim</p>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
