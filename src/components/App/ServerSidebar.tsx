@@ -12,7 +12,7 @@ import Alert from "@/components/UI/Alert";
 import Tabs from "@/components/UI/Tabs";
 import {useAppStore} from "@/store/app";
 import {AdminPane} from "@/components/App/panes/AdminSettingsPane";
-import {serverLinkStyle} from "@/utils/serverLinkStyle";
+import {serverLinkStyle} from "@/utils/styles/serverLinkStyle";
 import CurrentUserProfile from "@/components/UI/extension/CurrentUserProfile";
 import {useVirtualizer} from "@tanstack/react-virtual";
 import {AccountSettingsPane} from "@/components/App/panes/AccountSettingsPane";

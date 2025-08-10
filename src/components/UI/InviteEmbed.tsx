@@ -12,7 +12,7 @@ interface InviteEmbedProps {
 const InviteEmbed: React.FC<InviteEmbedProps> = ({ invite, onClick, isMember = false }) => {
   return (
     <div 
-      className="flex flex-col border rounded-md p-3 my-2 max-w-[400px] cursor-pointer bg-[#f0f0e8] hover:bg-[#f0f0e8] dark:bg-[#49473f] dark:hover:bg-[#49473f] dim:bg-[#282828] dim:hover:bg-[#282828] border-[#D3D2C8] dark:border-[#464540] dim:border-[#302F2A]"
+      className="flex flex-col border rounded-md p-3 my-2 max-w-[400px] cursor-pointer bg-[#f0f0e8] dark:bg-[#49473f] dim:bg-[#282828] dim:hover:bg-[#282828] border-[#D3D2C8] dark:border-[#595851] dim:border-[#302F2A]"
       onClick={onClick}
     >
       <div className="flex items-center gap-3 mb-2">

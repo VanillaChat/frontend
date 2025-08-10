@@ -2,7 +2,7 @@ import React, {useMemo, useRef, useState} from "react";
 import FullScreen from "@/components/UI/FullScreen";
 import {Tab} from "./Tab";
 import {FaCog, FaPencilAlt} from "react-icons/fa";
-import {serverLinkStyle} from "@/utils/serverLinkStyle";
+import {serverLinkStyle} from "@/utils/styles/serverLinkStyle";
 import {User} from "@/types/User";
 import {useSession} from "@/store/session";
 import Avatar from "@/components/UI/Avatar";
@@ -55,6 +55,9 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
     const { theme, setTheme } = useTheme();
+    const [emailChangeOpen, setEmailChangeOpen] = useState(false);
+    const [passwordChangeOpen, setPasswordChangeOpen] = useState(false);
+    const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
     const openEditModal = () => {
         setUsername(session.currentUser?.username || '');
@@ -207,6 +210,66 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
         }
     };
 
+    const clearAvatar = async () => {
+        if (!window.confirm('Are you sure you want to remove your avatar?')) return;
+        
+        try {
+            setIsSubmitting(true);
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    avatar: null,
+                    password: password || ''
+                })
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || 'Failed to clear avatar');
+            }
+
+            const updatedUser = await res.json();
+            session.updateCurrentUser(updatedUser);
+            updateUserInAllGuilds(updatedUser, members, session.currentUser!.id);
+        } catch (error) {
+            console.error('Error clearing avatar:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const clearBanner = async () => {
+        if (!window.confirm('Are you sure you want to remove your banner?')) return;
+        
+        try {
+            setIsSubmitting(true);
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    banner: null,
+                    password: password || ''
+                })
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || 'Failed to clear banner');
+            }
+
+            const updatedUser = await res.json();
+            session.updateCurrentUser(updatedUser);
+            updateUserInAllGuilds(updatedUser, members, session.currentUser!.id);
+        } catch (error) {
+            console.error('Error clearing banner:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const updateTheme = async (newTheme: Theme) => {
         if (newTheme === theme) return;
 
@@ -319,8 +382,8 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                     <div className="flex flex-col gap-2 mt-2">
                         <p className="font-bold text-[20px]">Profile</p>
                         <div className="flex flex-row gap-2 items-center">
-                            <div className="relative group">
-                                <div className="relative w-[92px] h-[92px] rounded-[10px] overflow-hidden">
+                            <div className="relative">
+                                <div className="relative w-[92px] h-[92px] rounded-[10px] overflow-hidden group">
                                     <Avatar
                                         id={session.currentUser.id}
                                         avatar={session.currentUser.avatar}
@@ -328,15 +391,14 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                         height="100%"
                                         className="w-full h-full object-cover rounded-[10px]"
                                     />
-                                    <div
-                                        className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                    <div 
+                                        className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             avatarInputRef.current?.click();
                                         }}
                                     >
-                                        <FaPencilAlt className="text-white text-lg mb-0.5" />
-                                        <span className="text-[14px] text-white">Change</span>
+                                        <FaPencilAlt className="text-white text-lg" />
                                     </div>
                                     <input
                                         type="file"
@@ -348,24 +410,39 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                         onChange={handleAvatarChange}
                                     />
                                 </div>
+                                <div className="h-5">
+                                    {session.currentUser.avatar && (
+                                        <button 
+                                            className="text-xs hover:underline mt-1 ml-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                clearAvatar();
+                                            }}
+                                        >
+                                            Remove Avatar
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <div className="relative flex-1">
                                 <div
                                     className="relative w-full h-[94px] bg-gradient-to-r from-blue-500 to-purple-600 rounded-[10px] overflow-hidden cursor-pointer group"
                                     onClick={() => bannerInputRef.current?.click()}
                                 >
-                                    {session.currentUser.banner && (
+                                    {session.currentUser.banner ? (
                                         <img 
                                             src={`${import.meta.env.VITE_API_URL}/cdn/banners/${session.currentUser.id}/${session.currentUser.banner}.webp`}
                                             alt="Banner" 
                                             className="w-full h-full object-cover"
                                         />
-                                    )}
-                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                        <div className="flex flex-col items-center text-white">
-                                            <FaPencilAlt className="text-lg mb-1" />
-                                            <span className="text-sm">Change Banner</span>
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <span className="text-white/80 text-sm">Add a banner image</span>
                                         </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center z-10">
+                                        <FaPencilAlt className="text-white text-lg mb-1" />
+                                        <span className="text-white text-sm">Change Banner</span>
                                     </div>
                                     <input
                                         type="file"
@@ -387,35 +464,73 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                         </div>
                                     </div>
                                 </div>
+                                <div className="h-5">
+                                    {session.currentUser.banner && (
+                                        <button 
+                                            className="text-xs hover:underline mt-1 ml-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                clearBanner();
+                                            }}
+                                        >
+                                            Remove Banner
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div className="flex flex-col mt-4">
-                            <div className="flex flex-row gap-2 justify-between items-center">
-                                <div className="flex flex-col justify-center">
-                                    <p className="font-bold translate-y-[2px]">Username</p>
-                                    <p className="translate-y-[-2px]">
-                                        {session.currentUser.username}
-                                        <span className="text-[20px] font-bold mx-1">/</span>
-                                        {session.currentUser.tag}
-                                    </p>
-                                </div>
-                                <Button className="!h-fit flex-none" onClick={openEditModal} filled>Edit Profile</Button>
-                            </div>
-                            {
-                                session.currentUser.bio && (
-                                    <div className="flex flex-row gap-2 justify-between items-center mt-2">
-                                        <div className="flex flex-col justify-center">
-                                            <p className="font-bold translate-y-[2px]">Bio</p>
-                                            <div className="translate-y-[-2px]">
-                                                <MarkdownRenderer disabledFeatures={["codeblock"]}>
-                                                    {session.currentUser.bio}
-                                                </MarkdownRenderer>
-                                            </div>
-                                        </div>
+                            <div className="bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
+                                <div className="flex flex-row gap-2 justify-between items-center">
+                                    <div className="flex flex-col justify-center">
+                                        <p className="font-bold translate-y-[2px]">Username</p>
+                                        <p className="translate-y-[-2px]">
+                                            {session.currentUser.username}
+                                            <span className="text-[20px] font-bold mx-1">/</span>
+                                            {session.currentUser.tag}
+                                        </p>
                                     </div>
-                                )
-                            }
-                            {/* Add more account settings here */}
+                                    <Button className="!h-fit flex-none" onClick={openEditModal} filled>Edit Profile</Button>
+                                </div>
+                                {
+                                    session.currentUser.bio && (
+                                        <>
+                                            <hr className="mt-3 border-[#D3D2C8] dark:border-[#464540] dim:border-[#302F2A]" />
+                                            <div className="flex flex-row gap-2 justify-between items-center mt-2">
+                                                <div className="flex flex-col justify-center">
+                                                    <p className="font-bold translate-y-[2px]">Bio</p>
+                                                    <div className="translate-y-[-2px]">
+                                                        <MarkdownRenderer disabledFeatures={["codeblock"]}>
+                                                            {session.currentUser.bio}
+                                                        </MarkdownRenderer>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )
+                                }
+                            </div>
+                            <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
+                                <div className="flex flex-col justify-center">
+                                    <p className="font-bold translate-y-[2px]">Email</p>
+                                    <p className="translate-y-[-2px]">{session.currentAccount.email}</p>
+                                </div>
+                                <Button className="!h-fit flex-none" onClick={() => setEmailChangeOpen(true)} filled>Change Email</Button>
+                            </div>
+                            <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
+                                <div className="flex flex-col justify-center">
+                                    <p className="font-bold translate-y-[2px]">Password</p>
+                                    <p className="translate-y-[-2px]">Changing your password will log you out of all active sessions.</p>
+                                </div>
+                                <Button className="!h-fit flex-none" onClick={() => setPasswordChangeOpen(true)} filled>Change Password</Button>
+                            </div>
+                            <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
+                                <div className="flex flex-col justify-center">
+                                    <p className="font-bold translate-y-[2px] text-red-500 dark:text-red-400 dim:text-red-400">Delete Account</p>
+                                    <p className="translate-y-[-2px]">This action is permanent and cannot be undone.</p>
+                                </div>
+                                <Button className="!h-fit flex-none" onClick={() => setDeleteAccountOpen(true)} destructive>Delete Account</Button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -604,6 +719,39 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                         />
                     </div>
                 </div>
+            </Modal>
+
+            <Modal
+                show={emailChangeOpen}
+                close={() => setEmailChangeOpen(false)}
+                title="Change Email"
+                subtitle="Soon."
+                onConfirm={() => setEmailChangeOpen(false)}
+
+                confirmDisabled={false}
+            >
+            </Modal>
+
+            <Modal
+                show={passwordChangeOpen}
+                close={() => setPasswordChangeOpen(false)}
+                title="Change Password"
+                subtitle="Soon."
+                onConfirm={() => setPasswordChangeOpen(false)}
+
+                confirmDisabled={false}
+            >
+            </Modal>
+
+            <Modal
+                show={deleteAccountOpen}
+                close={() => setDeleteAccountOpen(false)}
+                title="Delete Account"
+                subtitle="Soon."
+                onConfirm={() => setDeleteAccountOpen(false)}
+
+                confirmDisabled={false}
+            >
             </Modal>
         </FullScreen>
     );

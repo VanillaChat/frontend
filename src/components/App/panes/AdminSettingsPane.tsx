@@ -3,7 +3,8 @@ import {useAppStore} from "@/store/app";
 import {useSession} from "@/store/session";
 import {createColumnHelper} from "@tanstack/react-table";
 import cn from "@/utils/cn";
-import Button, {buttonStyles} from "@/components/UI/Button";
+import Button from "@/components/UI/Button";
+import {buttonStyles} from "@/utils/styles/buttonStyle";
 import {FaCopy, FaTrash} from "react-icons/fa";
 import {formatDate} from "@/utils/formatDate";
 import FullScreen from "@/components/UI/FullScreen";
@@ -11,7 +12,7 @@ import {MdAdminPanelSettings} from "react-icons/md";
 import Alert from "@/components/UI/Alert";
 import {RiQuestionFill} from "react-icons/ri";
 import Table from "@/components/UI/Table";
-import {serverLinkStyle} from "@/utils/serverLinkStyle";
+import {serverLinkStyle} from "@/utils/styles/serverLinkStyle";
 import {Tab} from "@/components/App/panes/Tab";
 import Avatar from "@/components/UI/Avatar";
 

@@ -12,7 +12,7 @@ import {usePresence, UserStatus} from "@/store/presence";
 import {useSession} from "@/store/session";
 import {useMembers} from "@/store/servers";
 import logo from "@/icons/squarelogo.png";
-import {buttonStyles} from "@/components/UI/Button";
+import {buttonStyles} from "@/utils/styles/buttonStyle";
 import {FaCopy} from "react-icons/fa";
 import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
 

@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import Avatar from "@/components/UI/Avatar";
 import logo from "@/icons/squarelogo.png";
 import {ServerMember} from "@/types/Server";
-import {buttonStyles} from "@/components/UI/Button";
+import {buttonStyles} from "@/utils/styles/buttonStyle";
 import {FaCopy} from "react-icons/fa";
 import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
 

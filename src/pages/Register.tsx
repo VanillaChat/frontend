@@ -12,7 +12,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import Alert from "@/components/UI/Alert";
 import CookieMaster from "@/utils/CookieMaster";
 
-export const UserSchema = z.object({
+const UserSchema = z.object({
    email: z.email("register.errors.invalidEmail"),
    username: z.string()
        .min(2, "register.errors.usernameTooShort")
