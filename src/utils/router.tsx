@@ -31,7 +31,8 @@ export let router = createBrowserRouter([
                     const json = await res.json();
                     session.login({
                         currentUser: json.user,
-                        currentAccount: json.account
+                        currentAccount: json.account,
+                        settings: json.settings,
                     });
                 }
             } catch (e) {
