@@ -9,7 +9,7 @@ export type SessionState = {
     settings: {
       theme: Theme;
     };
-    login: (data: Omit<SessionState, 'login' | 'logout' | 'updateCurrentUser'>) => void;
+    login: (data: Omit<SessionState, 'login' | 'logout' | 'updateCurrentUser' | 'setSettings'>) => void;
     logout: () => void;
     setSettings: (data: Partial<SessionState['settings']>) => void;
     updateCurrentUser: (data: Partial<User>) => void;
