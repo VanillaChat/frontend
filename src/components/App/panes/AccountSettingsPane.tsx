@@ -213,11 +213,13 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                 })
             });
 
-            if (res.status !== 200) {
+            if (res.status !== 204) {
                 setTheme(session.settings.theme);
             } else {
                 session.setSettings({ theme: newTheme });
             }
+
+            console.log(theme, newTheme, session.settings)
         } catch (error) {
             console.error('Error updating theme:', error);
         }
