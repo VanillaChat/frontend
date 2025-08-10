@@ -297,7 +297,7 @@ const ChatPane: React.FC = () => {
                 content={message.content}
                 createdAt={new Date(message.createdAt)}
                 state={message.state}
-                channelId={channelId}
+                channelId={channelId!}
                 updatedAt={message.updatedAt}
                 key={index}
                 index={index}
