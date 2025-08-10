@@ -90,32 +90,29 @@ const ChatPane: React.FC = () => {
   const channel = channels?.find(ch => ch.id === channelId) || {name: 'test'};
 
   const handleScroll = useCallback(() => {
-    if (!msgRef.current) return;
+    if (!msgRef.current || isInitialLoad.current) return;
 
-    if (isInitialLoad.current) {
-      return;
-    }
+    const { scrollTop, scrollHeight, clientHeight } = msgRef.current;
+    const scrollBottom = scrollHeight - scrollTop - clientHeight;
 
-    if (msgRef.current.scrollTop < 100 && !messages.isLoadingMore && messages.hasMoreMessages[channelId!]) {
+    // Load older messages when scrolling near the top
+    if (scrollTop < 200 && !messages.isLoadingMore && messages.hasMoreMessages[channelId!]) {
       isViewingOlderMessages.current = true;
-      
-      setPrevScrollHeight(msgRef.current.scrollHeight);
+      setPrevScrollHeight(scrollHeight);
+      setPrevScrollTop(scrollTop);
       messages.loadMoreMessages(channelId!);
     }
-
-    const scrollBottom = msgRef.current.scrollHeight - msgRef.current.scrollTop - msgRef.current.clientHeight;
-
-    if (scrollBottom < 200) {
-      if (isViewingOlderMessages.current) {
-        isViewingOlderMessages.current = false;
-      }
+    // Reset viewing older messages flag when scrolling down
+    else if (scrollBottom < 200) {
+      isViewingOlderMessages.current = false;
     }
     
-    if (scrollBottom < 100 && !messages.isLoadingNewer && messages.hasNewerMessages[channelId!]) {
-      setPrevScrollTop(msgRef.current.scrollTop);
+    // Load newer messages when scrolling near the bottom
+    if (scrollBottom < 300 && !messages.isLoadingNewer && messages.hasNewerMessages[channelId!]) {
+      setPrevScrollTop(scrollTop);
       messages.loadNewerMessages(channelId!);
     }
-  }, [channelId, messages, msgRef, setPrevScrollHeight, setPrevScrollTop, isInitialLoad]);
+  }, [channelId, messages, isInitialLoad]);
 
   useEffect(() => {
     if (!channelId) return;
@@ -139,37 +136,27 @@ const ChatPane: React.FC = () => {
   }, [handleScroll]);
 
   useEffect(() => {
-    if (!messages.isLoadingMore && msgRef.current && prevScrollHeight > 0) {
-      requestAnimationFrame(() => {
-        const newScrollHeight = msgRef.current!.scrollHeight;
-        const adjustment = newScrollHeight - prevScrollHeight;
+    if (!msgRef.current) return;
 
-        if (adjustment > 0) {
-          msgRef.current!.scrollTop = newScrollHeight - prevScrollHeight;
-        } else {
-          setTimeout(() => {
-            const delayedNewScrollHeight = msgRef.current!.scrollHeight;
-            const delayedAdjustment = delayedNewScrollHeight - prevScrollHeight;
-            
-            if (delayedAdjustment > 0) {
-              msgRef.current!.scrollTop = delayedNewScrollHeight - prevScrollHeight;
-            }
-          }, 100);
-        }
-
-        setTimeout(() => {
-          setPrevScrollHeight(0);
-        }, 200);
-      });
-    }
-  }, [messages.isLoadingMore, messages.data[channelId!], prevScrollHeight, channelId]);
-
-  useEffect(() => {
-    if (!messages.isLoadingNewer && msgRef.current && prevScrollTop > 0) {
+    if (messages.isLoadingMore && prevScrollHeight > 0) {
+      // Maintain scroll position when loading more messages
+      const scrollContainer = msgRef.current;
+      const oldScrollHeight = scrollContainer.scrollHeight;
+      
+      return () => {
+        if (!scrollContainer) return;
+        const newScrollHeight = scrollContainer.scrollHeight;
+        scrollContainer.scrollTop = scrollContainer.scrollTop + (newScrollHeight - oldScrollHeight);
+        setPrevScrollHeight(0);
+      };
+    } else if (!messages.isLoadingMore && prevScrollTop > 0) {
+      // Restore scroll position after loading completes
       msgRef.current.scrollTop = prevScrollTop;
       setPrevScrollTop(0);
     }
-  }, [messages.isLoadingNewer, messages.data[channelId!]]);
+  }, [messages.isLoadingMore, messages.data[channelId!], prevScrollHeight, prevScrollTop, channelId]);
+
+
 
   // Reset isInitialLoad when guildId changes to ensure scrolling works when switching servers
   useEffect(() => {
@@ -177,24 +164,21 @@ const ChatPane: React.FC = () => {
   }, [guildId]);
 
   useEffect(() => {
-    if (msgRef.current && isInitialLoad.current) {
-      setTimeout(() => {
-        if (msgRef.current) {
-          msgRef.current.scrollTop = msgRef.current.scrollHeight;
-          isInitialLoad.current = false;
-        }
-      }, 100);
-    }
-  }, [channelId, messages.data[channelId!]]);
+    const messageContainer = msgRef.current;
+    if (!messageContainer) return;
 
-  useEffect(() => {
-    if (msgRef.current && !messages.isLoadingMore && !prevScrollHeight && !isViewingOlderMessages.current && !isInitialLoad.current) {
-      const isNearBottom = msgRef.current.scrollHeight - msgRef.current.scrollTop - msgRef.current.clientHeight < 200;
+    if (isInitialLoad.current) {
+      // On initial load, scroll to bottom
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+      isInitialLoad.current = false;
+    } else if (!messages.isLoadingMore && !isViewingOlderMessages.current) {
+      // Auto-scroll to bottom when new messages arrive and we're not viewing older messages
+      const isNearBottom = messageContainer.scrollHeight - messageContainer.scrollTop - messageContainer.clientHeight < 300;
       if (isNearBottom) {
-        msgRef.current.scrollTop = msgRef.current.scrollHeight;
+        messageContainer.scrollTop = messageContainer.scrollHeight;
       }
     }
-  }, [messages.data, messages.isLoadingMore, prevScrollHeight]);
+  }, [channelId, messages.data[channelId!], messages.isLoadingMore, isViewingOlderMessages.current]);
   const length = document.querySelector('#where-modals')?.children.length;
   const handleFocus = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
