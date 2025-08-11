@@ -483,7 +483,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                             <div className="bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
                                 <div className="flex flex-row gap-2 justify-between items-center">
                                     <div className="flex flex-col justify-center">
-                                        <p className="font-bold translate-y-[2px]">Username</p>
+                                        <p className="font-bold">Username</p>
                                         <p className="translate-y-[-2px]">
                                             {session.currentUser.username}
                                             <span className="text-[20px] font-bold mx-1">/</span>
@@ -498,7 +498,7 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                             <hr className="mt-3 border-[#D3D2C8] dark:border-[#464540] dim:border-[#302F2A]" />
                                             <div className="flex flex-row gap-2 justify-between items-center mt-2">
                                                 <div className="flex flex-col justify-center">
-                                                    <p className="font-bold translate-y-[2px]">Bio</p>
+                                                    <p className="font-bold">Bio</p>
                                                     <div className="translate-y-[-2px]">
                                                         <MarkdownRenderer disabledFeatures={["codeblock"]}>
                                                             {session.currentUser.bio}
@@ -512,22 +512,22 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                             </div>
                             <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
                                 <div className="flex flex-col justify-center">
-                                    <p className="font-bold translate-y-[2px]">Email</p>
-                                    <p className="translate-y-[-2px]">{session.currentAccount.email}</p>
+                                    <p className="font-bold">Email</p>
+                                    <p>{session.currentAccount.email}</p>
                                 </div>
                                 <Button className="!h-fit flex-none" onClick={() => setEmailChangeOpen(true)} filled>Change Email</Button>
                             </div>
                             <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
                                 <div className="flex flex-col justify-center">
-                                    <p className="font-bold translate-y-[2px]">Password</p>
-                                    <p className="translate-y-[-2px]">Changing your password will log you out of all active sessions.</p>
+                                    <p className="font-bold">Password</p>
+                                    <p>Changing your password will log you out of all active sessions.</p>
                                 </div>
                                 <Button className="!h-fit flex-none" onClick={() => setPasswordChangeOpen(true)} filled>Change Password</Button>
                             </div>
                             <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
                                 <div className="flex flex-col justify-center">
-                                    <p className="font-bold translate-y-[2px] text-red-500 dark:text-red-400 dim:text-red-400">Delete Account</p>
-                                    <p className="translate-y-[-2px]">This action is permanent and cannot be undone.</p>
+                                    <p className="font-bold text-red-500 dark:text-red-400 dim:text-red-400">Delete Account</p>
+                                    <p>This action is permanent and cannot be undone.</p>
                                 </div>
                                 <Button className="!h-fit flex-none" onClick={() => setDeleteAccountOpen(true)} destructive>Delete Account</Button>
                             </div>
