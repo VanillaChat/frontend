@@ -11,9 +11,9 @@ export default function ProfileEditModal() {
     const session = useSession();
     const members = useMembers();
     const [openEditModal, setOpenEditModal] = React.useState(false);
-    const [username, setUsername] = useState(session.currentUser?.username);
-    const [tag, setTag] = useState(session.currentUser?.tag);
-    const [bio, setBio] = useState(session.currentUser?.bio);
+    const [username, setUsername] = useState(session.currentUser?.username ?? '');
+    const [tag, setTag] = useState(session.currentUser?.tag ?? '');
+    const [bio, setBio] = useState(session.currentUser?.bio ?? '');
     const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
