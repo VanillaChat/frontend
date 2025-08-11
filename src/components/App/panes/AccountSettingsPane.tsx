@@ -3,14 +3,9 @@ import FullScreen from "@/components/UI/FullScreen";
 import {Tab} from "./Tab";
 import {FaCog, FaPencilAlt} from "react-icons/fa";
 import {serverLinkStyle} from "@/utils/styles/serverLinkStyle";
-import {User} from "@/types/User";
 import {useSession} from "@/store/session";
 import Avatar from "@/components/UI/Avatar";
-import Input from "@/components/UI/Input";
-import Modal from "@/components/UI/Modal";
-import Button from "@/components/UI/Button";
 import {useMembers} from "@/store/servers";
-import {MarkdownRenderer} from "@/components/UI/MarkdownRenderer";
 import {Theme, useTheme} from "@/context/ThemeProvider";
 import LightThemePreview from "@/icons/images/light-theme-preview.svg";
 import DarkThemePreview from "@/icons/images/dark-theme-preview.svg";
@@ -23,250 +18,61 @@ import CompactModeOnDark from "@/icons/images/compact-mode-on-dark.svg";
 import CompactModeOnDim from "@/icons/images/compact-mode-on-dim.svg";
 import cn from "@/utils/cn";
 import {Checkbox} from "@base-ui-components/react/checkbox";
-
-const updateUserInAllGuilds = (updatedUser: User, members: ReturnType<typeof useMembers.getState>, currentUserId: string) => {
-    Object.entries(members.data).forEach(([guildId, guildMembers]) => {
-        const currentUserMember = guildMembers.find(m => m.user.id === currentUserId);
-        if (currentUserMember) {
-            members.updateMember(guildId, {
-                ...currentUserMember,
-                user: {
-                    ...currentUserMember.user,
-                    ...updatedUser
-                }
-            });
-        }
-    });
-};
+import DeleteAccountModal from "@/components/App/modals/DeleteAccountModal";
+import PasswordChangeModal from "@/components/App/modals/PasswordChangeModal";
+import EmailChangeModal from "@/components/App/modals/EmailChangeModal";
+import ProfileEditModal from "@/components/App/modals/ProfileEditModal";
+import {updateUserInAllGuilds} from "@/utils/updateUserInAllGuilds";
 
 export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearance'}) => {
     const [currentTab, setCurrentTab] = useState<typeof props.currentTab>(props.currentTab || 'overview');
     const session = useSession();
     const members = useMembers();
-
-    const [showModal, setShowModal] = useState(false);
-    const [username, setUsername] = useState('');
-    const [tag, setTag] = useState('');
-    const [bio, setBio] = useState('');
-    const [password, setPassword] = useState('');
     const [compactMode, setCompactMode] = useState(session.settings.compactMode);
     const [compactShowAvatars, setCompactShowAvatars] = useState(session.settings.compactShowAvatars);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
     const { theme, setTheme } = useTheme();
-    const [emailChangeOpen, setEmailChangeOpen] = useState(false);
-    const [passwordChangeOpen, setPasswordChangeOpen] = useState(false);
-    const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
-    const openEditModal = () => {
-        setUsername(session.currentUser?.username || '');
-        setTag(session.currentUser?.tag || '');
-        setBio(session.currentUser?.bio || '');
-        setPassword('');
-        setShowModal(true);
-    };
-
-    const validate = () => {
-        const newErrors: {username?: string; tag?: string; password?: string} = {};
-
-        if (!username.trim()) {
-            newErrors.username = 'Username is required';
-        } else if (username.length < 2) {
-            newErrors.username = 'Username must be at least 2 characters';
-        } else if (username.length > 32) {
-            newErrors.username = 'Username cannot exceed 32 characters';
-        } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-            newErrors.username = 'Username can only contain letters, numbers, and underscores';
+    const updateUserImage = async (
+        type: 'avatar' | 'banner',
+        file: File | null
+    ) => {
+        if (!file && !window.confirm(`Are you sure you want to remove your ${type}?`)) {
+            return;
         }
-
-        if (!tag.trim()) {
-            newErrors.tag = 'Tag is required';
-        } else if (tag.length > 8) {
-            newErrors.tag = 'Tag cannot exceed 8 characters';
-        } else if (!/^[a-zA-Z0-9]+$/.test(tag)) {
-            newErrors.tag = 'Tag can only contain letters and numbers';
-        }
-
-        if (!password) {
-            newErrors.password = 'Password is required to make changes';
-        }
-
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async () => {
-        if (!validate()) return;
-
-        setIsSubmitting(true);
 
         try {
-            let body: any = {
-                username,
-                tag,
-                bio,
-                password
-            };
+            let base64: string | null = null;
 
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(body)
-            });
-
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.message || 'Failed to update profile');
+            if (file) {
+                base64 = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = error => reject(error);
+                });
             }
-
-            const updatedUser = await res.json();
-            session.updateCurrentUser(updatedUser);
-            updateUserInAllGuilds(updatedUser, members, session.currentUser!.id);
-            setShowModal(false);
-
-        } catch (error) {
-            console.error('Error updating profile:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        try {
-            setIsSubmitting(true);
-            const base64 = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = error => reject(error);
-            });
 
             const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
-                    avatar: base64,
-                    password: password || ''
+                    [type]: base64
                 })
             });
 
             if (!res.ok) {
                 const error = await res.json();
-                throw new Error(error.error || 'Failed to update avatar');
-            }
-
-            const updatedUser = await res.json();
-            session.updateCurrentUser(updatedUser);
-            updateUserInAllGuilds(updatedUser, members, session.currentUser!.id);
-            setShowModal(false);
-        } catch (error) {
-            console.error('Error updating avatar:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        try {
-            setIsSubmitting(true);
-            const base64 = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = error => reject(error);
-            });
-
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    banner: base64,
-                    password: password || ''
-                })
-            });
-
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.error || 'Failed to update banner');
-            }
-
-            const updatedUser = await res.json();
-            session.updateCurrentUser(updatedUser);
-            updateUserInAllGuilds(updatedUser, members, session.currentUser!.id);
-            setShowModal(false);
-        } catch (error) {
-            console.error('Error updating banner:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const clearAvatar = async () => {
-        if (!window.confirm('Are you sure you want to remove your avatar?')) return;
-        
-        try {
-            setIsSubmitting(true);
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    avatar: null,
-                    password: password || ''
-                })
-            });
-
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.error || 'Failed to clear avatar');
+                throw new Error(error.error || `Failed to update ${type}`);
             }
 
             const updatedUser = await res.json();
             session.updateCurrentUser(updatedUser);
             updateUserInAllGuilds(updatedUser, members, session.currentUser!.id);
         } catch (error) {
-            console.error('Error clearing avatar:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const clearBanner = async () => {
-        if (!window.confirm('Are you sure you want to remove your banner?')) return;
-        
-        try {
-            setIsSubmitting(true);
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/@me`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    banner: null,
-                    password: password || ''
-                })
-            });
-
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.error || 'Failed to clear banner');
-            }
-
-            const updatedUser = await res.json();
-            session.updateCurrentUser(updatedUser);
-            updateUserInAllGuilds(updatedUser, members, session.currentUser!.id);
-        } catch (error) {
-            console.error('Error clearing banner:', error);
-        } finally {
-            setIsSubmitting(false);
+            console.error(`Error updating ${type}:`, error);
         }
     };
 
@@ -407,16 +213,21 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                         accept="image/png,image/jpeg,image/webp,image/gif"
                                         id="avatarInput"
                                         name="avatar"
-                                        onChange={handleAvatarChange}
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                await updateUserImage('avatar', file);
+                                            }
+                                        }}
                                     />
                                 </div>
                                 <div className="h-5">
                                     {session.currentUser.avatar && (
                                         <button 
                                             className="text-xs hover:underline mt-1 ml-1"
-                                            onClick={(e) => {
+                                            onClick={async (e) => {
                                                 e.stopPropagation();
-                                                clearAvatar();
+                                                await updateUserImage('avatar', null);
                                             }}
                                         >
                                             Remove Avatar
@@ -451,7 +262,12 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                         accept="image/png,image/jpeg,image/webp,image/gif"
                                         id="bannerInput"
                                         name="banner"
-                                        onChange={handleBannerChange}
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                await updateUserImage('banner', file);
+                                            }
+                                        }}
                                     />
                                     <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                                         <div className="flex flex-col text-white my-[8px]">
@@ -468,9 +284,9 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                                     {session.currentUser.banner && (
                                         <button 
                                             className="text-xs hover:underline mt-1 ml-1"
-                                            onClick={(e) => {
+                                            onClick={async (e) => {
                                                 e.stopPropagation();
-                                                clearBanner();
+                                                await updateUserImage('banner', null);
                                             }}
                                         >
                                             Remove Banner
@@ -480,57 +296,10 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                             </div>
                         </div>
                         <div className="flex flex-col mt-4">
-                            <div className="bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
-                                <div className="flex flex-row gap-2 justify-between items-center">
-                                    <div className="flex flex-col justify-center">
-                                        <p className="font-bold">Username</p>
-                                        <p className="translate-y-[-2px]">
-                                            {session.currentUser.username}
-                                            <span className="text-[20px] font-bold mx-1">/</span>
-                                            {session.currentUser.tag}
-                                        </p>
-                                    </div>
-                                    <Button className="!h-fit flex-none" onClick={openEditModal} filled>Edit Profile</Button>
-                                </div>
-                                {
-                                    session.currentUser.bio && (
-                                        <>
-                                            <hr className="mt-3 border-[#D3D2C8] dark:border-[#464540] dim:border-[#302F2A]" />
-                                            <div className="flex flex-row gap-2 justify-between items-center mt-2">
-                                                <div className="flex flex-col justify-center">
-                                                    <p className="font-bold">Bio</p>
-                                                    <div className="translate-y-[-2px]">
-                                                        <MarkdownRenderer disabledFeatures={["codeblock"]}>
-                                                            {session.currentUser.bio}
-                                                        </MarkdownRenderer>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )
-                                }
-                            </div>
-                            <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
-                                <div className="flex flex-col justify-center">
-                                    <p className="font-bold">Email</p>
-                                    <p>{session.currentAccount.email}</p>
-                                </div>
-                                <Button className="!h-fit flex-none" onClick={() => setEmailChangeOpen(true)} filled>Change Email</Button>
-                            </div>
-                            <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
-                                <div className="flex flex-col justify-center">
-                                    <p className="font-bold">Password</p>
-                                    <p>Changing your password will log you out of all active sessions.</p>
-                                </div>
-                                <Button className="!h-fit flex-none" onClick={() => setPasswordChangeOpen(true)} filled>Change Password</Button>
-                            </div>
-                            <div className="flex flex-row gap-2 mt-2 justify-between items-center bg-[#F2F2F2] dark:bg-[#302F2B] dim:bg-[#0f0f0f] rounded-[10px] px-6 py-4">
-                                <div className="flex flex-col justify-center">
-                                    <p className="font-bold text-red-500 dark:text-red-400 dim:text-red-400">Delete Account</p>
-                                    <p>This action is permanent and cannot be undone.</p>
-                                </div>
-                                <Button className="!h-fit flex-none" onClick={() => setDeleteAccountOpen(true)} destructive>Delete Account</Button>
-                            </div>
+                            <ProfileEditModal />
+                            <EmailChangeModal />
+                            <PasswordChangeModal />
+                            <DeleteAccountModal />
                         </div>
                     </div>
                 )}
@@ -665,94 +434,6 @@ export const AccountSettingsPane = (props: {currentTab?: 'overview' | 'appearanc
                     </div>
                 )}
             </div>
-
-            <Modal
-                show={showModal}
-                close={() => setShowModal(false)}
-                title="Edit Profile"
-                onConfirm={handleSubmit}
-                confirmText="Save Changes"
-                confirmDisabled={isSubmitting || (!username.trim() || !tag.trim() || !password.trim()) || (`${username.trim()}/${tag.trim()}` === `${session.currentUser.username}/${session.currentUser.tag}` && bio === (session.currentUser.bio || ''))}
-            >
-                <div className="flex flex-col gap-4 mt-4">
-                    <div className="flex flex-row gap-2">
-                        <div className="flex-1">
-                            <Input
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                id="username"
-                                label="Username"
-                            />
-                        </div>
-                        <div className="w-32">
-                            <div className="relative">
-                                <Input
-                                    value={tag}
-                                    onChange={(e) => setTag(e.target.value)}
-                                    id="tag"
-                                    label="Tag"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="!mb-1 flex flex-col w-full gap-2">
-                        <Input
-                            type="text"
-                            placeholder="Enter your bio"
-                            textarea
-                            value={bio}
-                            onChange={(e) => setBio(e.target.value)}
-                            id="bio"
-                            label="Bio"
-                            maxLength={256}
-                        />
-                        <p className="self-end">{bio.length} / 256</p>
-                    </div>
-                    <div className="!mb-3">
-                        <Input
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            id="password"
-                            label="Password"
-                        />
-                    </div>
-                </div>
-            </Modal>
-
-            <Modal
-                show={emailChangeOpen}
-                close={() => setEmailChangeOpen(false)}
-                title="Change Email"
-                subtitle="Soon."
-                onConfirm={() => setEmailChangeOpen(false)}
-
-                confirmDisabled={false}
-            >
-            </Modal>
-
-            <Modal
-                show={passwordChangeOpen}
-                close={() => setPasswordChangeOpen(false)}
-                title="Change Password"
-                subtitle="Soon."
-                onConfirm={() => setPasswordChangeOpen(false)}
-
-                confirmDisabled={false}
-            >
-            </Modal>
-
-            <Modal
-                show={deleteAccountOpen}
-                close={() => setDeleteAccountOpen(false)}
-                title="Delete Account"
-                subtitle="Soon."
-                onConfirm={() => setDeleteAccountOpen(false)}
-
-                confirmDisabled={false}
-            >
-            </Modal>
         </FullScreen>
     );
 };
