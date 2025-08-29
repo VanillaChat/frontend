@@ -13,6 +13,7 @@ import { useAppStore } from "@/store/app";
 import { useEditCache, useMessages } from "@/store/messages";
 import { useChannels } from "@/store/servers";
 import { useSession } from "@/store/session";
+import type { Channel } from "@/types/Server";
 
 export const ChatPaneStub: React.FC = () => {
 	const isDM = location.pathname.includes("@me");
@@ -59,55 +60,6 @@ const ChatPane: React.FC = () => {
 	const isLoadingRef = useRef(false);
 	const lastScrollTop = useRef(0);
 	const { theme } = useTheme();
-	const lastTypingTimeRef = useRef<{ [channelId: string]: number }>({});
-
-	const sendTypingIndicator = useCallback(
-		throttle(async (channelId: string) => {
-			const now = Date.now();
-			const lastTime = lastTypingTimeRef.current[channelId] || 0;
-
-			if (now - lastTime > 9000 || !lastTypingTimeRef.current[channelId]) {
-				try {
-					const response = await fetch(
-						`${import.meta.env.VITE_API_URL}/channels/${channelId}/typing`,
-						{
-							method: "POST",
-							credentials: "include",
-							headers: {
-								"Content-Type": "application/json",
-							},
-						},
-					);
-
-					if (response.ok) {
-						lastTypingTimeRef.current[channelId] = now;
-					} else {
-						console.error(
-							"Failed to send typing indicator:",
-							response.status,
-							response.statusText,
-						);
-					}
-				} catch (error) {
-					console.error("Error sending typing indicator:", error);
-				}
-			}
-		}, 1000),
-		[],
-	);
-
-	const clearTypingIndicator = useCallback(
-		(channelId: string, userId?: string) => {
-			delete lastTypingTimeRef.current[channelId];
-
-			if (userId) {
-				messages.removeTypingIndicator(channelId, userId);
-			} else if (session.currentUser) {
-				messages.removeTypingIndicator(channelId, session.currentUser.id);
-			}
-		},
-		[messages, session.currentUser],
-	);
 
 	const channel = channels?.find((ch) => ch.id === channelId) || {
 		name: "test",
@@ -284,72 +236,6 @@ const ChatPane: React.FC = () => {
 		return () => document.removeEventListener("keydown", handleFocus);
 	}, [handleFocus]);
 
-	const onPostMessage = useCallback(
-		async (event: React.KeyboardEvent) => {
-			if (event.key === "Enter" && !event.shiftKey && !event.repeat) {
-				event.preventDefault();
-				if (messages.savedContent[channelId as string].trim().length > 0) {
-					clearTypingIndicator(channelId as string, session.currentUser?.id);
-
-					if (typeof messages.data[channelId as string] === "undefined")
-						messages.setMessages(channelId as string, []);
-					const nonce = messages.data[channelId as string]?.at(-1)?.id ?? "0";
-					const message = messages.pushOptimistic(channelId as string, {
-						content: messages.savedContent[channelId as string],
-						createdAt: new Date(Date.now()),
-						updatedAt: null,
-						author: {
-							id: session.currentUser?.id,
-							username: session.currentUser?.username,
-							avatar: session.currentUser?.avatar,
-						},
-						type: "DEFAULT",
-					});
-					messages.setContent(channelId as string, "");
-					msgRef.current?.scrollIntoView({
-						behavior: "smooth",
-						block: "end",
-						inline: "nearest",
-					});
-					const res = await fetch(
-						`${import.meta.env.VITE_API_URL}/channels/${channelId as string}/messages`,
-						{
-							method: "POST",
-							credentials: "include",
-							body: JSON.stringify({
-								content: messages.savedContent[channelId as string].trim(),
-								nonce,
-							}),
-						},
-					);
-					const json = await res.json();
-					if (res.status === 200) {
-						message.edit({
-							...json,
-							state: "SENT",
-						});
-					} else {
-						message.edit({
-							state: "FAILED",
-						});
-					}
-				}
-			}
-		},
-		[
-			messages.data,
-			messages.savedContent,
-			clearTypingIndicator,
-			channelId,
-			messages.pushOptimistic,
-			messages.setContent,
-			messages.setMessages,
-			session.currentUser?.avatar,
-			session.currentUser?.id,
-			session.currentUser?.username,
-		],
-	);
-
 	return (
 		<div className="w-full h-full flex flex-col min-h-0 dark:bg-[#262622] dim:bg-[#141413]">
 			<div className="bg-[#FBFBFB] dark:bg-[#36362E] dim:bg-[#171717] dark:border-b-[#36362E] dim:border-b-[#171717] h-[52px] p-[20px_25px] flex flex-row border-b-[1px] border-b-[#e0e0e0] items-center gap-[5px]">
@@ -381,7 +267,7 @@ const ChatPane: React.FC = () => {
 								state={message.state}
 								channelId={channelId as string}
 								updatedAt={message.updatedAt}
-								key={nanoid()}
+								key={message.id ?? `${message.author.id}-${message.createdAt}`}
 								index={index}
 								id={message.id}
 							/>
@@ -480,23 +366,161 @@ const ChatPane: React.FC = () => {
 						</div>
 					</button>
 				)}
-			<Input
-				placeholder={`Message #${channel?.name}`}
-				containerClass="flex w-[98%] text-center justify-self-center self-center mt-auto mb-[15px] [&>input]:shadow-none z-[999]"
-				className="resize-none shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
-				textarea
-				innerRef={inputRef}
-				id={`text-input-${nanoid()}`}
-				value={messages.savedContent[channelId as string] ?? ""}
-				onChange={async (e) => {
-					messages.setContent(channelId as string, e.target.value);
-					if (e.target.value.trim().length > 0) {
-						await sendTypingIndicator(channelId as string);
-					}
-				}}
-				onKeyDown={onPostMessage}
+			<ChatInput
+				channelId={channelId as string}
+				channel={channel}
+				msgRef={msgRef}
 			/>
 		</div>
 	);
 };
+const ChatInput = memo(function ChatInput({
+	channelId,
+	channel,
+	msgRef,
+}: {
+	channelId: string;
+	channel: Channel | { name: string };
+	msgRef: React.RefObject<HTMLUListElement | null>;
+}) {
+	const value = useMessages((s) => s.savedContent[channelId] ?? "");
+	const setContent = useMessages((s) => s.setContent);
+	const session = useSession();
+	const lastTypingTimeRef = useRef<{ [channelId: string]: number }>({});
+	const messages = useMessages();
+
+	const sendTypingIndicator = useCallback(
+		throttle(async (channelId: string) => {
+			const now = Date.now();
+			const lastTime = lastTypingTimeRef.current[channelId] || 0;
+
+			if (now - lastTime > 9000 || !lastTypingTimeRef.current[channelId]) {
+				try {
+					const response = await fetch(
+						`${import.meta.env.VITE_API_URL}/channels/${channelId}/typing`,
+						{
+							method: "POST",
+							credentials: "include",
+							headers: {
+								"Content-Type": "application/json",
+							},
+						},
+					);
+
+					if (response.ok) {
+						lastTypingTimeRef.current[channelId] = now;
+					} else {
+						console.error(
+							"Failed to send typing indicator:",
+							response.status,
+							response.statusText,
+						);
+					}
+				} catch (error) {
+					console.error("Error sending typing indicator:", error);
+				}
+			}
+		}, 1000),
+		[],
+	);
+
+	const clearTypingIndicator = useCallback(
+		(channelId: string, userId?: string) => {
+			delete lastTypingTimeRef.current[channelId];
+
+			if (userId) {
+				messages.removeTypingIndicator(channelId, userId);
+			} else if (session.currentUser) {
+				messages.removeTypingIndicator(channelId, session.currentUser.id);
+			}
+		},
+		[messages, session.currentUser],
+	);
+
+	const onPostMessage = useCallback(
+		async (event: React.KeyboardEvent) => {
+			if (event.key === "Enter" && !event.shiftKey && !event.repeat) {
+				event.preventDefault();
+				if (value.trim().length > 0) {
+					clearTypingIndicator(channelId, session.currentUser?.id);
+
+					if (typeof messages.data[channelId] === "undefined")
+						messages.setMessages(channelId, []);
+					const nonce = messages.data[channelId]?.at(-1)?.id ?? "0";
+					const message = messages.pushOptimistic(channelId, {
+						content: messages.savedContent[channelId],
+						createdAt: new Date(Date.now()),
+						updatedAt: null,
+						author: {
+							id: session.currentUser?.id,
+							username: session.currentUser?.username,
+							avatar: session.currentUser?.avatar,
+						},
+						type: "DEFAULT",
+					});
+					messages.setContent(channelId, "");
+					msgRef.current?.scrollIntoView({
+						behavior: "smooth",
+						block: "end",
+						inline: "nearest",
+					});
+					const res = await fetch(
+						`${import.meta.env.VITE_API_URL}/channels/${channelId}/messages`,
+						{
+							method: "POST",
+							credentials: "include",
+							body: JSON.stringify({
+								content: messages.savedContent[channelId].trim(),
+								nonce,
+							}),
+						},
+					);
+					const json = await res.json();
+					if (res.status === 200) {
+						message.edit({
+							...json,
+							state: "SENT",
+						});
+					} else {
+						message.edit({
+							state: "FAILED",
+						});
+					}
+				}
+			}
+		},
+		[
+			messages.data,
+			messages.savedContent,
+			clearTypingIndicator,
+			channelId,
+			messages.pushOptimistic,
+			messages.setContent,
+			messages.setMessages,
+			session.currentUser?.avatar,
+			session.currentUser?.id,
+			session.currentUser?.username,
+			value,
+			msgRef.current,
+		],
+	);
+
+	return (
+		<Input
+			placeholder={`Message #${channel?.name}`}
+			containerClass="flex w-[98%] text-center justify-self-center self-center mt-auto mb-[15px] [&>input]:shadow-none z-[999]"
+			className="resize-none shadow-none border-[1px] border-[#D3D2C8] bg-[#fffefa]"
+			textarea
+			value={value}
+			onChange={async (e) => {
+				setContent(channelId, e.target.value);
+				if (e.target.value.trim().length > 0) {
+					await sendTypingIndicator(channelId as string);
+				}
+			}}
+			onKeyDown={onPostMessage}
+		/>
+	);
+});
+
 export default memo(ChatPane);
