@@ -1,101 +1,107 @@
 @import "tailwindcss";
 
+/* biome-ignore lint/suspicious/noUnknownAtRules: tailwind directive */
 @custom-variant dark (&:where(.dark, .dark *));
+/* biome-ignore lint/suspicious/noUnknownAtRules: tailwind directive */
 @custom-variant dim (&:where(.dim, .dim *));
 
+/* biome-ignore lint/suspicious/noUnknownAtRules: tailwind directive */
 @theme {
-  --shadow-input: 0 1px 2px 0 rgba(40, 36, 16, 0.05), 0 0 0 4px #F1ECCC;
-  --shadow-input-dark: 0 1px 2px 0 rgba(40, 36, 16, 0.05), 0 0 0 4px #474444;
-  --shadow-input-dim: 0 1px 2px 0 rgba(40, 36, 16, 0.05), 0 0 0 4px #2e2d29;
-  --shadow-modal: 0 20px 24px -4px rgba(16, 24, 40, 0.08), 0 8px 8px -4px rgba(16, 24, 40, 0.03);
-  --logo-animation: logo 1s linear infinite;
-  --logo-animation-dark: logo-dark 1s linear infinite;
-  --color-backdrop-modal: rgba(224, 224, 224, 0.85);
-  --color-backdrop-modal-dark: rgba(25, 23, 23, 0.85);
-  --font-logo: Roboto, sans-serif;
-  --shadow-message: 0 5px 24px 0 rgba(208, 208, 208, 1);
+	--shadow-input: 0 1px 2px 0 rgba(40, 36, 16, 0.05), 0 0 0 4px #f1eccc;
+	--shadow-input-dark: 0 1px 2px 0 rgba(40, 36, 16, 0.05), 0 0 0 4px #474444;
+	--shadow-input-dim: 0 1px 2px 0 rgba(40, 36, 16, 0.05), 0 0 0 4px #2e2d29;
+	--shadow-modal:
+		0 20px 24px -4px rgba(16, 24, 40, 0.08), 0 8px 8px -4px
+		rgba(16, 24, 40, 0.03);
+	--logo-animation: logo 1s linear infinite;
+	--logo-animation-dark: logo-dark 1s linear infinite;
+	--color-backdrop-modal: rgba(224, 224, 224, 0.85);
+	--color-backdrop-modal-dark: rgba(25, 23, 23, 0.85);
+	--font-logo: Roboto, sans-serif;
+	--shadow-message: 0 5px 24px 0 rgba(208, 208, 208, 1);
 }
 
 @keyframes logo {
-  0% {
-    /*transform: scale(0.95);*/
-    box-shadow: 0 0 0 0 rgba(200, 180, 101, 0.87);
-    background: rgba(234, 210, 84, 0.7);
-  }
+	0% {
+		/*transform: scale(0.95);*/
+		box-shadow: 0 0 0 0 rgba(200, 180, 101, 0.87);
+		background: rgba(234, 210, 84, 0.7);
+	}
 
-  70% {
-    /*transform: scale(1);*/
-    background: rgba(247, 226, 107, 0);
-    box-shadow: 0 0 0 10px rgba(247, 226, 107, 0);
-  }
+	70% {
+		/*transform: scale(1);*/
+		background: rgba(247, 226, 107, 0);
+		box-shadow: 0 0 0 10px rgba(247, 226, 107, 0);
+	}
 
-  100% {
-    /*transform: scale(0.95);*/
-    background: rgba(247, 226, 107, 0);
-    box-shadow: 0 0 0 0 rgba(247, 226, 107, 0);
-  }
+	100% {
+		/*transform: scale(0.95);*/
+		background: rgba(247, 226, 107, 0);
+		box-shadow: 0 0 0 0 rgba(247, 226, 107, 0);
+	}
 }
 
 @keyframes logo-dark {
-  0% {
-    /*transform: scale(0.95);*/
-    box-shadow: 0 0 0 0 rgba(246, 214, 125, 0.87);
-    background: rgba(218, 194, 95, 0.7);
-  }
+	0% {
+		/*transform: scale(0.95);*/
+		box-shadow: 0 0 0 0 rgba(246, 214, 125, 0.87);
+		background: rgba(218, 194, 95, 0.7);
+	}
 
-  70% {
-    /*transform: scale(1);*/
-    background: rgba(247, 226, 107, 0);
-    box-shadow: 0 0 0 10px rgba(247, 226, 107, 0);
-  }
+	70% {
+		/*transform: scale(1);*/
+		background: rgba(247, 226, 107, 0);
+		box-shadow: 0 0 0 10px rgba(247, 226, 107, 0);
+	}
 
-  100% {
-    /*transform: scale(0.95);*/
-    background: rgba(247, 226, 107, 0);
-    box-shadow: 0 0 0 0 rgba(247, 226, 107, 0);
-  }
+	100% {
+		/*transform: scale(0.95);*/
+		background: rgba(247, 226, 107, 0);
+		box-shadow: 0 0 0 0 rgba(247, 226, 107, 0);
+	}
 }
 
 * {
-  -webkit-user-drag: none;
+	-webkit-user-drag: none;
 }
 
 #app-root {
-  isolation: isolate;
-  height: 100vh;
+	isolation: isolate;
+	height: 100vh;
 }
 
 body {
-  margin: 0;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  user-select: none;
+	margin: 0;
+	font-family:
+		Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+		"Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+		sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	user-select: none;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+	font-family:
+		source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+	width: 8px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: transparent;
+	background: transparent;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 5px;
+	background: #888;
+	border-radius: 5px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+	background: #555;
 }

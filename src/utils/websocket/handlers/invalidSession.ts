@@ -1,17 +1,24 @@
-import ReconnectingWebSocket from "@/utils/websocket/ReconnectingWebSocket";
-import {Payload} from "@/utils/websocket/handlers/index";
-import {useSession} from "@/store/session";
-import {router} from "@/utils/router";
+import { useSession } from "@/store/session";
+import { router } from "@/utils/router";
+import type { Payload } from "@/utils/websocket/handlers/index";
+import type ReconnectingWebSocket from "@/utils/websocket/ReconnectingWebSocket";
 
-export default function invalidSession(ws: ReconnectingWebSocket, data: Payload) {
-    console.log(`[WS] Invalid session opcode received. Closing connection...`);
-    if (ws.heartbeatInterval) {
-        clearInterval(ws.heartbeatInterval);
-        ws.heartbeatInterval = null;
-    }
-    if (!data.d) {
-        ws.close();
-        useSession.getState().logout();
-        router.navigate('/login');
-    }
+export default async function invalidSession(
+	ws: ReconnectingWebSocket,
+	data: Payload,
+) {
+	console.log(`[WS] Invalid session opcode received. Closing connection...`);
+	if (ws.heartbeatInterval) {
+		clearInterval(ws.heartbeatInterval);
+		ws.heartbeatInterval = null;
+	}
+	if (!data.d) {
+		ws.close();
+		useSession.getState().logout();
+		await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+			credentials: "include",
+			method: "POST",
+		});
+		await router.navigate("/login");
+	}
 }

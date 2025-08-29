@@ -1,61 +1,61 @@
 {
-  "placeholder": {
-    "username": "MojaSuperNazwa1234"
-  },
-  "common": {
-    "username": "Nazwa użytkownika",
-    "email": "Adres e-mail",
-    "password": "Hasło",
-    "or": "LUB",
-    "repeatPassword": "Powtórz hasło",
-    "getStarted": "Rozpocznij",
-    "create": "Stwórz",
-    "cancel": "Anuluj"
-  },
-  "login": {
-    "title": "Zaloguj się do swojego konta",
-    "subtitle": "Witaj ponownie! Wpisz proszę swoje dane.",
-    "emailPlaceholder": "Wpisz swój adres e-mail",
-    "forgotPassword": "Zapomniałeś hasła?",
-    "loginButton": "Zaloguj się",
-    "signInWithDiscord": "Zaloguj się przez Discord",
-    "dontHaveAccount": "Nie masz jeszcze konta?",
-    "signUp": "Zarejestruj się"
-  },
-  "register": {
-    "title": "Utwórz konto",
-    "subtitle": "Witaj w {appName}!",
-    "useDiscord": "Stwórz konto przez Discord",
-    "alreadyHaveAccount": "Masz już konto?",
-    "signIn": "Zaloguj się",
-    "creatingAccount": "Tworzenie konta..."
-  },
-  "forgotPassword": {
-    "title": "Zapomniałeś hasła?",
-    "subtitle": "Nie ma problemu! Wpisz swój adres e-mail, a my wyślemy Ci link do resetowania hasła.",
-    "resetPassword": "Zresetuj hasło",
-    "goBack": "Wróć"
-  },
-  "app": {
-    "me": {
-      "directMessages": "Wiadomości prywatne",
-      "friends": "Znajomi",
-      "dmSearch": "Szukaj w wiadomościach prywatnych"
-    },
-    "modals": {
-      "groupCreate": {
-        "title": "Stwórz grupę",
-        "subtitle": "Grupa składa się z wielu użytkowników, którzy mogą rozmawiać na różne tematy w pokojach zwanych skrzynkami.",
-        "name": "Nazwa grupy",
-        "description": "Opis grupy",
-        "icon": "Wrzuć ikonę!",
-        "defaultName": "Grupa użytkownika {username}",
-        "defaultDescription": "To jest opis!"
-      }
-    },
-    "chat": {
-      "noMessages": "Na początku była cisza...",
-      "noMessagesDescription": "Bądź pierwszy, który coś napisze!"
-    }
-  }
+	"placeholder": {
+		"username": "MojaSuperNazwa1234"
+	},
+	"common": {
+		"username": "Nazwa użytkownika",
+		"email": "Adres e-mail",
+		"password": "Hasło",
+		"or": "LUB",
+		"repeatPassword": "Powtórz hasło",
+		"getStarted": "Rozpocznij",
+		"create": "Stwórz",
+		"cancel": "Anuluj"
+	},
+	"login": {
+		"title": "Zaloguj się do swojego konta",
+		"subtitle": "Witaj ponownie! Wpisz proszę swoje dane.",
+		"emailPlaceholder": "Wpisz swój adres e-mail",
+		"forgotPassword": "Zapomniałeś hasła?",
+		"loginButton": "Zaloguj się",
+		"signInWithDiscord": "Zaloguj się przez Discord",
+		"dontHaveAccount": "Nie masz jeszcze konta?",
+		"signUp": "Zarejestruj się"
+	},
+	"register": {
+		"title": "Utwórz konto",
+		"subtitle": "Witaj w {appName}!",
+		"useDiscord": "Stwórz konto przez Discord",
+		"alreadyHaveAccount": "Masz już konto?",
+		"signIn": "Zaloguj się",
+		"creatingAccount": "Tworzenie konta..."
+	},
+	"forgotPassword": {
+		"title": "Zapomniałeś hasła?",
+		"subtitle": "Nie ma problemu! Wpisz swój adres e-mail, a my wyślemy Ci link do resetowania hasła.",
+		"resetPassword": "Zresetuj hasło",
+		"goBack": "Wróć"
+	},
+	"app": {
+		"me": {
+			"directMessages": "Wiadomości prywatne",
+			"friends": "Znajomi",
+			"dmSearch": "Szukaj w wiadomościach prywatnych"
+		},
+		"modals": {
+			"groupCreate": {
+				"title": "Stwórz grupę",
+				"subtitle": "Grupa składa się z wielu użytkowników, którzy mogą rozmawiać na różne tematy w pokojach zwanych skrzynkami.",
+				"name": "Nazwa grupy",
+				"description": "Opis grupy",
+				"icon": "Wrzuć ikonę!",
+				"defaultName": "Grupa użytkownika {username}",
+				"defaultDescription": "To jest opis!"
+			}
+		},
+		"chat": {
+			"noMessages": "Na początku była cisza...",
+			"noMessagesDescription": "Bądź pierwszy, który coś napisze!"
+		}
+	}
 }
