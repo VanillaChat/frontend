@@ -11,7 +11,6 @@ export default defineConfig(() => {
 		plugins: [react(), viteTsconfigPaths(), svgrPlugin(), tailwindcss()],
 		resolve: {
 			alias: {
-				// @ts-expect-error
 				"@": fileURLToPath(new URL("./src", import.meta.url)),
 			},
 		},
