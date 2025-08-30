@@ -189,7 +189,7 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
 									>
 										<Select.Trigger
 											className={cn(
-												"flex h-10 min-w-36 items-center justify-between gap-3 rounded-md border pr-3 pl-3.5 text-base select-none",
+												"flex h-10 cursor-pointer min-w-36 items-center justify-between gap-3 rounded-md border pr-3 pl-3.5 text-base select-none",
 												"border-gray-200  hover:bg-gray-100 focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 active:bg-gray-100 data-[popup-open]:bg-gray-100  text-gray-900",
 												"dark:border-[#545353] dark:hover:bg-[#545353] dark:data-[popup-open]:bg-[#545353] dark:active:bg-[#545353] dark:text-white",
 												"dim:border-[#2A2A2A] dim:hover:bg-[#2A2A2A] dim:data-[popup-open]:bg-[#2A2A2A] dim:active:bg-[#2A2A2A]  dim:text-white",
@@ -229,7 +229,7 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
 														<Select.Item
 															key={label}
 															value={value}
-															className="min-w-[var(--anchor-width)] cursor-default items-center flex flex-row justify-between gap-2 py-2 px-4 text-sm leading-4 outline-none select-none group-data-[side=none]:min-w-[calc(var(--anchor-width)+1rem)] group-data-[side=none]:pr-12 group-data-[side=none]:text-base group-data-[side=none]:leading-4 data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-[#f7e26b] data-[highlighted]:text-black"
+															className="min-w-[var(--anchor-width)] cursor-pointer items-center flex flex-row justify-between gap-2 py-2 px-4 text-sm leading-4 outline-none select-none group-data-[side=none]:min-w-[calc(var(--anchor-width)+1rem)] group-data-[side=none]:pr-12 group-data-[side=none]:text-base group-data-[side=none]:leading-4 data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-[#f7e26b] data-[highlighted]:text-black"
 														>
 															<Select.ItemText className="flex flex-row items-center gap-2">
 																<div
@@ -246,7 +246,7 @@ export default function CurrentUserProfile(props: UserProfileSmallProps) {
 														</Select.Item>
 													))}
 												</Select.Popup>
-												<Select.ScrollDownArrow className="bottom-0 z-[1] flex h-4 w-full cursor-default items-center justify-center rounded-md bg-[canvas] text-center text-xs before:absolute before:top-[-100%] before:left-0 before:h-full before:w-full before:content-[''] data-[direction=down]:bottom-0 data-[direction=down]:before:bottom-[-100%]" />
+												<Select.ScrollDownArrow className="bottom-0 z-[1] flex h-4 w-full cursor-pointer items-center justify-center rounded-md bg-[canvas] text-center text-xs before:absolute before:top-[-100%] before:left-0 before:h-full before:w-full before:content-[''] data-[direction=down]:bottom-0 data-[direction=down]:before:bottom-[-100%]" />
 											</Select.Positioner>
 										</Select.Portal>
 									</Select.Root>

@@ -22,4 +22,5 @@ export type ServerMember = {
 	nickname: string | null;
 	user: User;
 	userId: string;
+	joinedAt: string;
 };

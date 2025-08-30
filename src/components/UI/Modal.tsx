@@ -77,7 +77,12 @@ const Modal = ({
 	return createPortal(
 		<AnimatePresence initial={false} onExitComplete={() => void 0}>
 			{show && (
-				<div className="fixed top-0 z-50 bottom-0 left-0 right-0 bg-backdrop-modal dark:bg-backdrop-modal-dark dim:bg-backdrop-modal-dark backdrop-blur-[5px] flex justify-center items-center transition-opacity duration-[0.25s] ease-in-out">
+				// biome-ignore lint/a11y/noStaticElementInteractions: yes
+				// biome-ignore lint/a11y/useKeyWithClickEvents: yes
+				<div
+					className="fixed top-0 z-50 bottom-0 left-0 right-0 bg-backdrop-modal dark:bg-backdrop-modal-dark dim:bg-backdrop-modal-dark backdrop-blur-[5px] flex justify-center items-center transition-opacity duration-[0.25s] ease-in-out"
+					onClick={() => isOpenRef.current && closable && close()}
+				>
 					{/*<button*/}
 					{/*	className="absolute top-0 bottom-0 right-0 left-0"*/}
 					{/*	onClick={closable ? close : void 0}*/}

@@ -111,6 +111,7 @@ const ServerAddModal: React.FC = () => {
 									nickname: null,
 									user: session.currentUser,
 									id: Math.floor(Math.random() * 100000),
+									joinedAt: new Date().toISOString(),
 								},
 							]);
 						}
