@@ -473,6 +473,9 @@ const ChatInput = memo(function ChatInput({
 								content: messages.savedContent[channelId].trim(),
 								nonce,
 							}),
+							headers: {
+								'Content-Type': 'application/json'
+							}
 						},
 					);
 					const json = await res.json();
