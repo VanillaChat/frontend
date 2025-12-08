@@ -477,7 +477,7 @@ const ChatInput = memo(function ChatInput({
 								'Content-Type': 'application/json'
 							}
 						},
-					)
+					);
 					const json = await res.json();
 					if (res.status === 200) {
 						message.edit({
